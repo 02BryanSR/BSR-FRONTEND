@@ -1,0 +1,56 @@
+@theme {
+  --font-family-primary: sans-serif;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  --color-black: #000000;
+  --color-white: #ffffff;
+
+  --color-danger-600: #e10600;
+
+  --color-ink-900: #1e1f2e;
+
+  --color-neutral-800: #262626;
+  --color-neutral-100: #f4f4f4;
+  --color-neutral-200: #dedede;
+  --color-neutral-250: #9c9c9c;
+  --color-neutral-300: #969696;
+  --color-neutral-400: #838383;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-900: #1e1e1e;
+
+  --color-surface-panel: #f8f5ef;
+  --color-surface-popover: #f4f1eb;
+  --color-surface-soft: #f3ede2;
+  --color-surface-media: #e8e1d7;
+  --color-surface-product: #d9d2c7;
+
+  --color-shell-900: #121212;
+  --color-shell-925: #111111;
+  --color-shell-950: #0d0d0d;
+  --color-shell-960: #0c0c0c;
+  --color-shell-975: #0b0b0b;
+  --color-shell-990: #050505;
+
+  --color-toast-danger-50: #fdeaea;
+  --color-toast-danger-200: #e9b8b5;
+  --color-toast-danger-500: #d88a84;
+  --color-toast-danger-600: #d14b3d;
+  --color-toast-success-50: #eaf8ef;
+  --color-toast-success-200: #b8e3c4;
+  --color-toast-success-500: #4f9f67;
+  --color-toast-success-600: #2f7a47;
+}

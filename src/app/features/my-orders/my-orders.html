@@ -1,0 +1,178 @@
+<section class="w-full px-6 pb-16 pt-28 md:px-10 lg:px-12.5">
+  <div class="mx-auto max-w-7xl space-y-6">
+    <header class="rounded-[2rem] bg-shell-925 px-6 py-7 text-white shadow-[0_24px_70px_rgba(0,0,0,0.2)] md:px-8">
+      <p class="text-[11px] uppercase tracking-[0.35em] text-white/55">Tu historial</p>
+      <div class="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 class="text-3xl font-semibold uppercase tracking-[0.14em] md:text-4xl">Mis pedidos</h1>
+          <p class="mt-3 max-w-2xl text-sm leading-7 text-white/70 md:text-base">
+            Consulta tus pedidos reales, revisa sus líneas y sigue el estado exacto que devuelve tu backend.
+          </p>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2">
+          <article class="rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4">
+            <p class="text-[11px] uppercase tracking-[0.26em] text-white/45">Pedidos</p>
+            <strong class="mt-3 block text-2xl font-semibold">{{ orders().length }}</strong>
+          </article>
+
+          <article class="rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4">
+            <p class="text-[11px] uppercase tracking-[0.26em] text-white/45">Creados</p>
+            <strong class="mt-3 block text-2xl font-semibold">{{ createdCount() }}</strong>
+          </article>
+        </div>
+      </div>
+    </header>
+
+    <article class="rounded-[2rem] border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:p-6">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Seguimiento</p>
+          <h2 class="mt-3 text-2xl font-semibold uppercase tracking-[0.14em] text-neutral-950">
+            Tus pedidos
+          </h2>
+        </div>
+
+        @if (loading()) {
+          <p class="text-sm text-neutral-500">Cargando...</p>
+        }
+      </div>
+
+      @if (orders().length) {
+        <div class="mt-6 space-y-4">
+          @for (order of orders(); track order.id) {
+            <article class="rounded-[1.7rem] border border-black/10 bg-surface-panel p-5">
+              <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-3">
+                    <h3 class="text-xl font-semibold text-neutral-950">Pedido #{{ order.id }}</h3>
+                    <span
+                      class="rounded-full border px-3 py-1 text-[11px] uppercase tracking-[0.2em]"
+                      [class]="statusClasses(order.status)"
+                    >
+                      {{ order.status }}
+                    </span>
+                  </div>
+
+                  <div class="mt-4 grid gap-3 text-sm text-neutral-600 sm:grid-cols-3">
+                    <p>
+                      <strong class="block text-[11px] uppercase tracking-[0.22em] text-neutral-500">Total</strong>
+                      <span class="mt-2 block text-base font-semibold text-neutral-950">{{
+                        order.totalPrice | currency: 'EUR' : 'symbol' : '1.0-2' : 'es'
+                      }}</span>
+                    </p>
+
+                    <p>
+                      <strong class="block text-[11px] uppercase tracking-[0.22em] text-neutral-500">Artículos</strong>
+                      <span class="mt-2 block text-base font-semibold text-neutral-950">{{ order.totalAmount }}</span>
+                    </p>
+
+                    <p>
+                      <strong class="block text-[11px] uppercase tracking-[0.22em] text-neutral-500">Fecha</strong>
+                      <span class="mt-2 block text-base font-semibold text-neutral-950">
+                        {{ order.createdAt | date: 'dd/MM/yyyy HH:mm' : undefined : 'es' }}
+                      </span>
+                    </p>
+                  </div>
+
+                  <div class="mt-4 grid gap-3 text-sm text-neutral-600 sm:grid-cols-2">
+                    <p>
+                      <strong class="block text-[11px] uppercase tracking-[0.22em] text-neutral-500">Pago</strong>
+                      <span class="mt-2 block font-medium text-neutral-900">{{ order.payMethod }}</span>
+                    </p>
+
+                    <p>
+                      <strong class="block text-[11px] uppercase tracking-[0.22em] text-neutral-500">Dirección</strong>
+                      <span class="mt-2 block font-medium text-neutral-900">
+                        {{ getAddressLabel(order.addressId) }}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex w-full flex-col gap-3 xl:w-72">
+                  <button
+                    type="button"
+                    (click)="toggleDetails(order)"
+                    class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+                  >
+                    {{ isExpanded(order.id) ? 'Ocultar detalle' : 'Ver detalle' }}
+                  </button>
+
+                  @if (loadingDetailsOrderId() === order.id) {
+                    <p class="text-sm text-neutral-500">Cargando líneas del pedido...</p>
+                  }
+                </div>
+              </div>
+
+              @if (isExpanded(order.id)) {
+                <div class="mt-5 rounded-[1.4rem] border border-black/10 bg-white p-4">
+                  <p class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Detalle del pedido</p>
+
+                  @if (loadingDetailsOrderId() === order.id) {
+                    <p class="mt-4 text-sm text-neutral-600">Cargando líneas del pedido...</p>
+                  } @else if (getOrderDetails(order.id).length) {
+                    <div class="mt-4 space-y-3">
+                      @for (detail of getOrderDetails(order.id); track detail.id) {
+                        <article class="grid gap-3 rounded-[1.2rem] border border-black/10 bg-surface-panel px-4 py-4 md:grid-cols-[5rem_1fr_auto_auto]">
+                          <figure class="overflow-hidden rounded-[1rem] bg-white">
+                            @if (detail.imageUrl) {
+                              <img
+                                [src]="detail.imageUrl"
+                                [alt]="detail.productName"
+                                class="aspect-[4/5] h-full w-full object-cover"
+                              />
+                            } @else {
+                              <div class="flex aspect-[4/5] items-center justify-center px-2 text-center text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+                                Sin imagen
+                              </div>
+                            }
+                          </figure>
+
+                          <div>
+                            <p class="font-medium text-neutral-900">{{ detail.productName }}</p>
+                            <p class="mt-1 text-xs uppercase tracking-[0.2em] text-neutral-500">
+                              Producto #{{ detail.productId }}
+                            </p>
+                          </div>
+
+                          <p class="text-sm text-neutral-600">x{{ detail.quantity }}</p>
+                          <p class="text-sm font-semibold text-neutral-900">
+                            {{ detail.subtotal | currency: 'EUR' : 'symbol' : '1.0-2' : 'es' }}
+                          </p>
+                        </article>
+                      }
+                    </div>
+                  } @else {
+                    <p class="mt-4 text-sm text-neutral-600">
+                      Este pedido todavía no devuelve líneas de detalle.
+                    </p>
+                  }
+                </div>
+              }
+            </article>
+          }
+        </div>
+      } @else {
+        <article class="mt-6 rounded-[1.6rem] border border-dashed border-black/15 bg-surface-panel px-5 py-8 text-sm leading-7 text-neutral-600">
+          Todavía no tienes pedidos registrados. Cuando confirmes uno desde checkout aparecerá aquí.
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a
+              routerLink="/cart"
+              class="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800"
+            >
+              Ir al carrito
+            </a>
+            <a
+              routerLink="/women"
+              class="inline-flex items-center justify-center rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+            >
+              Ir a comprar
+            </a>
+          </div>
+        </article>
+      }
+    </article>
+  </div>
+</section>
+

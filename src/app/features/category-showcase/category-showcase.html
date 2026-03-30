@@ -1,0 +1,40 @@
+<section class="w-full px-6 pb-16 pt-28 md:px-10 lg:px-12.5">
+  <div class="mx-auto max-w-[1920px]">
+    @if (supportsSubcategories()) {
+      <app-category-subcategory-nav
+        [route]="currentPath"
+        [selectedSubcategory]="selectedSubcategory()"
+      ></app-category-subcategory-nav>
+    }
+
+    <section aria-label="Productos">
+      @if (products().length) {
+        <div class="grid auto-rows-auto gap-x-7 gap-y-10 md:grid-cols-2 xl:grid-cols-4">
+          @for (entry of productCards(); track entry.product.id) {
+            <app-catalog-product-card
+              [product]="entry.product"
+              [variant]="entry.variant"
+              [busy]="addingProductId() === entry.product.id"
+              (add)="addToCart($event)"
+            ></app-catalog-product-card>
+          }
+        </div>
+      } @else {
+        <app-surface-card
+          tone="panel"
+          padding="none"
+          radius="md"
+          [dashed]="true"
+          [shadow]="false"
+          extraClasses="px-5 py-8 text-sm leading-7 text-neutral-600"
+        >
+          @if (supportsSubcategories() && selectedSubcategory() !== 'all') {
+            Todavía no hay productos reales en {{ selectedSubcategoryLabel() }}.
+          } @else {
+            Todavía no hay productos reales para esta categoría.
+          }
+        </app-surface-card>
+      }
+    </section>
+  </div>
+</section>

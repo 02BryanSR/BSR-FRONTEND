@@ -1,0 +1,32 @@
+@theme {
+  --default-font-family: var(--font-family-primary);
+}
+
+html {
+  font-size: var(--font-size-base);
+}
+
+body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface-product) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-surface-product);
+  border-radius: 999px;
+}

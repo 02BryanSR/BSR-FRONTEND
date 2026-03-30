@@ -1,0 +1,22 @@
+<section class="mb-[30px] space-y-4" aria-label="Subcategorías">
+  <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">{{ label() }}</p>
+
+  <div class="flex flex-wrap gap-2">
+    @for (option of options(); track option.slug) {
+      <a
+        [routerLink]="route()"
+        [queryParams]="getQueryParams(option.slug)"
+        class="inline-flex items-center justify-center rounded-full border px-4 py-3 text-[11px] uppercase tracking-[0.18em] transition"
+        [class.border-black]="selectedSubcategory() === option.slug"
+        [class.bg-black]="selectedSubcategory() === option.slug"
+        [class.text-white]="selectedSubcategory() === option.slug"
+        [class.border-black/10]="selectedSubcategory() !== option.slug"
+        [class.bg-white]="selectedSubcategory() !== option.slug"
+        [class.text-neutral-900]="selectedSubcategory() !== option.slug"
+        [class.hover:border-black]="selectedSubcategory() !== option.slug"
+      >
+        {{ option.label }}
+      </a>
+    }
+  </div>
+</section>

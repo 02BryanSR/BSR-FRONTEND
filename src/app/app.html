@@ -1,0 +1,11 @@
+<main class="mx-auto w-full max-w-[1920px]">
+  @if (showHeader()) {
+    <div class="fixed left-1/2 top-0 z-50 w-full max-w-[1920px] -translate-x-1/2">
+      <app-header></app-header>
+      <app-sidebar></app-sidebar>
+    </div>
+  }
+
+  <router-outlet />
+  <app-toast />
+</main>

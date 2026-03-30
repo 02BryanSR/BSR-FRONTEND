@@ -1,0 +1,161 @@
+﻿<section
+  class="relative grid min-h-screen grid-cols-1 items-center overflow-visible bg lg:h-screen lg:grid-cols-[1fr_1fr]"
+>
+  <section class="relative z-10 hidden justify-center items-center lg:flex lg:min-h-0 lg:p-0">
+    <img
+      src="/images/portada.png"
+      alt="background"
+      class="max-h-[60vh] w-auto max-w-none rounded-3xl object-left"
+    />
+  </section>
+
+  <section
+    class="relative z-10 flex min-h-screen items-start justify-center px-8 py-9.5 lg:min-h-0 lg:items-center lg:p-0"
+  >
+    <article class="flex max-h-233 w-full max-w-90 flex-col lg:max-h-125">
+      <header class="flex flex-col items-center text-center">
+        <h1 class="text-center text-[32px] font-semibold leading-10.5 text-ink-900">
+          Iniciar sesión
+        </h1>
+        <p class="mx-auto w-68.75 text-center text-neutral-250 sm:w-auto lg:hidden">
+          Descubre las últimas tendencias de moda
+        </p>
+      </header>
+
+      <form class="space-y-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <section>
+          <div class="mt-16 flex items-center justify-between lg:mt-8">
+            <label
+              class="mt-16 block text-[15px] font-medium lg:mt-8"
+              [ngClass]="
+                emailCtrl.touched && emailCtrl.invalid
+                  ? 'text-danger-600'
+                  : emailValid
+                    ? 'text-neutral-900'
+                    : 'text-neutral-600'
+              "
+            >
+              E-mail
+            </label>
+
+            @if (
+              emailCtrl.touched && (emailCtrl.errors?.['required'] || emailCtrl.errors?.['email'])
+            ) {
+              <span class="ml-3 whitespace-nowrap text-sm text-danger-600">
+                {{
+                  emailCtrl.errors?.['required']
+                    ? 'El email es obligatorio.'
+                    : emailCtrl.errors?.['email']
+                      ? 'El formato del e-mail no es válido.'
+                      : ''
+                }}
+              </span>
+            }
+          </div>
+
+          <div
+            class="flex items-center border-b"
+            [ngClass]="
+              emailCtrl.touched && emailCtrl.invalid
+                ? 'border-danger-600'
+                : emailValid
+                  ? 'border-surface-product'
+                  : 'border-neutral-200'
+            "
+          >
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="usuario@gmail.com"
+              class="w-full py-3 text-sm placeholder:text-neutral-300 focus:outline-none"
+            />
+
+            @if (emailValid) {
+              <span
+                class="ml-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-product"
+              >
+                <app-icon name="icon-check" class="h-3 w-3 text-black"></app-icon>
+              </span>
+            }
+          </div>
+        </section>
+
+        <section>
+          <div class="flex items-center justify-between">
+            <label
+              class="block text-[15px] font-medium"
+              [ngClass]="
+                passwordCtrl.touched && passwordCtrl.invalid
+                  ? 'text-danger-600'
+                  : passwordValid
+                    ? 'text-neutral-900'
+                    : 'text-neutral-600'
+              "
+            >
+              Contraseña
+            </label>
+
+            @if (passwordCtrl.touched && passwordCtrl.invalid) {
+              <span class="ml-3 whitespace-nowrap text-sm text-danger-600">
+                {{ passwordCtrl.errors?.['required'] ? 'La contraseña es obligatoria.' : '' }}
+              </span>
+            }
+          </div>
+
+          <div
+            class="flex items-center border-b"
+            [ngClass]="
+              passwordCtrl.touched && passwordCtrl.invalid
+                ? 'border-danger-600'
+                : passwordValid
+                  ? 'border-surface-product'
+                  : 'border-neutral-200'
+            "
+          >
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Introduce aquí tu contraseña"
+              class="w-full py-3 text-sm placeholder:text-neutral-300 focus:outline-none"
+            />
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="ml-2 text-neutral-300 hover:text-neutral-400"
+              aria-label="Mostrar u ocultar contraseña"
+            >
+              <app-icon name="eye" class="h-4 w-4"></app-icon>
+            </button>
+          </div>
+        </section>
+
+        <button
+          type="submit"
+          [disabled]="isSubmitting()"
+          class="mt-13 flex h-11.75 w-full items-center justify-center rounded-md bg-surface-media font-semibold text-black transition-colors hover:bg-surface-product disabled:cursor-not-allowed disabled:opacity-60 lg:mx-auto lg:mt-8.5 lg:w-68.75"
+        >
+          {{ isSubmitting() ? 'Entrando...' : 'Empezar' }}
+        </button>
+
+        <div class="flex justify-center">
+          <a
+            routerLink="/forgot-password"
+            class="text-sm text-neutral-900 transition-colors hover:text-neutral-600 hover:underline"
+          >
+            Recuperar contraseña
+          </a>
+        </div>
+
+        <p class="text-center text-sm text-neutral-600">
+          ¿Eres nuevo?
+          <a
+            routerLink="/register"
+            class="font-medium text-neutral-900 transition-colors hover:text-neutral-600 hover:underline"
+          >
+            Crea tu cuenta
+          </a>
+        </p>
+      </form>
+    </article>
+  </section>
+</section>

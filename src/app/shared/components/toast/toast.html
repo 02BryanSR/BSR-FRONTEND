@@ -1,0 +1,54 @@
+﻿@if (toast().visible) {
+  <section
+    class="pointer-events-none fixed bottom-6 left-1/2 z-50 flex w-full max-w-[1920px] -translate-x-1/2 justify-center px-4"
+  >
+    <article
+      class="pointer-events-auto w-full max-w-90.25 rounded-[10px] p-5 shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
+      [class.bg-toast-danger-50]="toast().type === 'error'"
+      [class.bg-toast-success-50]="toast().type === 'success'"
+    >
+      <div class="flex items-start gap-4">
+        <div
+          class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+          [class.bg-toast-danger-200]="toast().type === 'error'"
+          [class.text-toast-danger-600]="toast().type === 'error'"
+          [class.bg-toast-success-200]="toast().type === 'success'"
+          [class.text-toast-success-600]="toast().type === 'success'"
+        >
+          <app-icon [name]="toast().type === 'success' ? 'icon-check' : 'icon-close'" class="h-3.5 w-3.5"></app-icon>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <p
+            class="font-poppins text-[22px] font-semibold leading-6"
+            [class.text-toast-danger-600]="toast().type === 'error'"
+            [class.text-toast-success-600]="toast().type === 'success'"
+          >
+            {{ toast().title }}
+          </p>
+
+          <p
+            class="mt-2 font-poppins text-sm leading-5"
+            [class.text-toast-danger-600]="toast().type === 'error'"
+            [class.text-toast-success-600]="toast().type === 'success'"
+          >
+            {{ toast().message }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          (click)="close()"
+          aria-label="Cerrar notificacion"
+          class="shrink-0 transition"
+          [class.text-toast-danger-500]="toast().type === 'error'"
+          [class.hover:text-toast-danger-600]="toast().type === 'error'"
+          [class.text-toast-success-500]="toast().type === 'success'"
+          [class.hover:text-toast-success-600]="toast().type === 'success'"
+        >
+          <app-icon name="icon-close" class="h-5 w-5"></app-icon>
+        </button>
+      </div>
+    </article>
+  </section>
+}

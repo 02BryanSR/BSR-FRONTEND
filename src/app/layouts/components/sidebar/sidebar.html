@@ -1,0 +1,152 @@
+<div class="flex items-center justify-between px-6 py-4 text-white md:px-10 lg:hidden">
+  <button
+    type="button"
+    aria-label="Abrir menu"
+    class="inline-flex items-center justify-center"
+    [class.text-white]="isHome()"
+    [class.text-black]="!isHome()"
+    (click)="toggle()"
+  >
+    <app-icon name="icon-hamburger" class="h-7 w-7"></app-icon>
+  </button>
+
+  <p
+    class="text-center text-xs font-bold uppercase tracking-[0.25em] md:text-sm"
+    [class.text-white]="isHome()"
+    [class.text-black]="!isHome()"
+  >
+    BOLD STYLE REVOLUTION
+  </p>
+
+  @if (authService.isAdmin()) {
+    <a
+      routerLink="/admin/dashboard"
+      aria-label="Ir al dashboard"
+      class="inline-flex items-center justify-center rounded-full border px-3 py-2 text-[10px] uppercase tracking-[0.2em]"
+      [class.border-white/30]="isHome()"
+      [class.text-white]="isHome()"
+      [class.border-black/10]="!isHome()"
+      [class.text-black]="!isHome()"
+    >
+      Dashboard
+    </a>
+  } @else {
+    <div aria-hidden="true" class="h-7 w-7"></div>
+  }
+</div>
+
+@if (isOpen()) {
+  <button
+    type="button"
+    aria-label="Cerrar menu"
+    class="fixed inset-0 z-70 bg-black/45 lg:hidden"
+    (click)="close()"
+  ></button>
+
+  <aside
+    class="fixed inset-y-0 left-0 z-80 flex w-[min(88vw,24rem)] flex-col bg-shell-960 px-6 py-6 text-white shadow-2xl lg:hidden"
+  >
+    <header class="flex items-center justify-between">
+      <p class="text-sm font-bold uppercase tracking-[0.25em]">BOLD STYLE REVOLUTION</p>
+
+      <button
+        type="button"
+        aria-label="Cerrar menu"
+        class="inline-flex items-center justify-center text-white"
+        (click)="close()"
+      >
+        <app-icon name="icon-close" class="h-6 w-6"></app-icon>
+      </button>
+    </header>
+
+    <nav class="mt-10 text-lg uppercase tracking-[0.22em]" aria-label="Navegacion movil">
+      <ul class="flex flex-col gap-6">
+        @for (link of navLinks(); track link.route) {
+          <li class="space-y-3">
+            @if (hasSubcategoryMenu(link)) {
+              <button
+                type="button"
+                class="flex w-full items-center justify-between border-b border-transparent pb-2 text-left text-white/85 transition hover:border-white hover:text-white"
+                (click)="toggleSubcategories(link.route)"
+              >
+                <span>{{ link.label }}</span>
+                <span
+                  class="text-sm transition-transform duration-200"
+                  [class.rotate-180]="expandedNavRoute() === link.route"
+                >
+                  v
+                </span>
+              </button>
+
+              @if (expandedNavRoute() === link.route) {
+                <div class="flex flex-col gap-3 pl-4 text-sm uppercase tracking-[0.18em]">
+                  @for (subcategory of subcategoryOptions; track subcategory.slug) {
+                    <a
+                      [routerLink]="link.route"
+                      [queryParams]="getSubcategoryQueryParams(subcategory.slug)"
+                      class="text-white/65 transition hover:text-white"
+                      (click)="close()"
+                    >
+                      {{ subcategory.label }}
+                    </a>
+                  }
+                </div>
+              }
+            } @else {
+              <a
+                [routerLink]="link.route"
+                routerLinkActive="border-white text-white"
+                class="border-b border-transparent pb-2 text-white/85 transition hover:border-white hover:text-white"
+                (click)="close()"
+              >
+                {{ link.label }}
+              </a>
+            }
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <footer class="mt-auto border-t border-white/15 pt-6">
+      <p class="mb-4 text-xs uppercase tracking-[0.25em] text-white/60">Acciones</p>
+      @if (authService.isAdmin()) {
+        <a
+          routerLink="/admin/dashboard"
+          class="mb-4 inline-flex w-full items-center justify-center rounded-full border border-white/20 px-4 py-3 text-xs uppercase tracking-[0.22em] text-white"
+          (click)="close()"
+        >
+          Ver dashboard
+        </a>
+      }
+
+      <div class="flex items-center gap-5 text-white">
+        <button
+          type="button"
+          aria-label="Buscar"
+          class="inline-flex items-center justify-center text-white"
+        >
+          <app-icon name="icon-search" class="h-5 w-5"></app-icon>
+        </button>
+
+        <a
+          routerLink="/cart"
+          aria-label="Abrir compras o favoritos"
+          class="relative inline-flex items-center justify-center text-white"
+          (click)="close()"
+        >
+          <app-icon name="icon-bag" class="h-5 w-5"></app-icon>
+          @if (authService.isAuthenticated() && cartItemCount() > 0) {
+            <span
+              class="absolute -right-2 -top-2 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-black px-1 text-[10px] font-semibold text-white"
+            >
+              {{ cartItemCount() }}
+            </span>
+          }
+        </a>
+
+        <app-account-menu [panelAlign]="'left'"></app-account-menu>
+      </div>
+    </footer>
+  </aside>
+}
+

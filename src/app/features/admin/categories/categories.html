@@ -1,0 +1,301 @@
+<section class="space-y-6">
+  <header
+    class="flex flex-col gap-4 rounded-[2rem] bg-shell-925 px-6 py-7 text-white shadow-[0_24px_70px_rgba(0,0,0,0.2)] md:flex-row md:items-end md:justify-between"
+  >
+    <div>
+      <p class="text-[11px] uppercase tracking-[0.35em] text-white/55">Admin categorías</p>
+      <h1 class="mt-4 text-3xl font-medium uppercase tracking-[0.14em] md:text-4xl">
+        Categorías y subcategorías
+      </h1>
+      <p class="mt-3 max-w-2xl text-sm leading-7 text-white/70 md:text-base">
+        Gestiona las categorías y sus subcategorías desde este panel. Los productos se administran
+        aparte dentro de cada subcategoría.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      (click)="startCreate()"
+      class="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-xs uppercase tracking-[0.22em] text-black transition hover:bg-neutral-200"
+    >
+      Nueva categoría
+    </button>
+  </header>
+
+  <section class="grid gap-6 lg:grid-cols-[minmax(0,1.18fr)_minmax(22rem,0.82fr)]">
+    <article class="rounded-[2rem] border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:p-6">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Listado</p>
+          <h2 class="mt-3 text-2xl font-medium uppercase tracking-[0.14em] text-neutral-950">
+            {{ categories().length }} categorías
+          </h2>
+        </div>
+
+        @if (loading()) {
+          <p class="text-sm text-neutral-500">Cargando...</p>
+        }
+      </div>
+
+      @if (catalogGroups().length) {
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          @for (group of catalogGroups(); track group.category.id) {
+            <article
+              (click)="selectCatalogCategory(group.category.id)"
+              class="cursor-pointer rounded-[1.6rem] border border-black/10 bg-surface-panel p-5 transition hover:border-black"
+              [class.border-black]="selectedCatalogCategoryId() === group.category.id"
+              [class.shadow-[0_18px_40px_rgba(15,23,42,0.08)]]="selectedCatalogCategoryId() === group.category.id"
+            >
+              @if (group.category.imageUrl) {
+                <figure class="mb-5 overflow-hidden rounded-[1.2rem] bg-neutral-200">
+                  <img
+                    [src]="group.category.imageUrl"
+                    [alt]="group.category.name"
+                    class="aspect-[16/9] w-full object-cover"
+                  />
+                </figure>
+              }
+
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="text-lg font-medium uppercase tracking-[0.14em] text-neutral-950">
+                    {{ group.category.name }}
+                  </h3>
+                  <p class="mt-2 text-[11px] uppercase tracking-[0.22em] text-neutral-500">
+                    {{ group.products.length }} productos asociados
+                  </p>
+                </div>
+
+                <span class="rounded-full border border-black/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-600">
+                  #{{ group.category.id }}
+                </span>
+              </div>
+
+              <p class="mt-4 text-sm leading-7 text-neutral-600">{{ group.category.description }}</p>
+
+              <div class="mt-5 flex flex-wrap items-center gap-3">
+                <span class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white">
+                  Ver subcategorías
+                </span>
+
+                <button
+                  type="button"
+                  (click)="$event.stopPropagation(); startEdit(group.category)"
+                  class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  (click)="$event.stopPropagation(); deleteCategory(group.category)"
+                  class="inline-flex items-center justify-center rounded-full border border-red-200 px-4 py-3 text-xs uppercase tracking-[0.22em] text-red-700 transition hover:bg-red-50"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+
+        @if (selectedCatalogGroup(); as selectedGroup) {
+          <section #subcategoryPanel class="mt-8 border-t border-black/10 pt-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Subcategorías</p>
+                <h3 class="mt-3 text-2xl font-medium uppercase tracking-[0.14em] text-neutral-950">
+                  {{ selectedGroup.category.name }}
+                </h3>
+                <p class="mt-2 text-sm leading-7 text-neutral-600">
+                  Crea subcategorías aquí y abre cada una para gestionar sus productos en un
+                  apartado independiente.
+                </p>
+              </div>
+
+              <span class="rounded-full border border-black/10 px-4 py-3 text-[11px] uppercase tracking-[0.22em] text-neutral-600">
+                {{ selectedGroup.subcategories.length }} subcategorías
+              </span>
+            </div>
+
+            <form
+              class="mt-6 rounded-[1.6rem] border border-black/10 bg-surface-panel p-5"
+              [formGroup]="subcategoryForm"
+              (ngSubmit)="createSubcategory()"
+            >
+              <div class="flex flex-col gap-4 md:flex-row md:items-end">
+                <label class="block flex-1 space-y-2">
+                  <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">
+                    Nueva subcategoría
+                  </span>
+                  <input
+                    type="text"
+                    formControlName="label"
+                    class="w-full rounded-[1.1rem] border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+                    placeholder="Ejemplo: Punto premium"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  class="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800"
+                >
+                  Añadir subcategoría
+                </button>
+              </div>
+            </form>
+
+            @if (selectedGroup.subcategories.length) {
+              <div class="mt-6 grid gap-4 md:grid-cols-2">
+                @for (subcategory of selectedGroup.subcategories; track subcategory.slug) {
+                  <article class="rounded-[1.6rem] border border-black/10 bg-surface-panel p-5">
+                    <div class="flex items-start justify-between gap-4">
+                      <div>
+                        <h4 class="text-lg font-medium uppercase tracking-[0.14em] text-neutral-950">
+                          {{ subcategory.label }}
+                        </h4>
+                        <p class="mt-2 text-[11px] uppercase tracking-[0.22em] text-neutral-500">
+                          {{ subcategory.productCount }} productos asignados
+                        </p>
+                      </div>
+
+                      <span class="rounded-full border border-black/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-600">
+                        {{ subcategory.slug }}
+                      </span>
+                    </div>
+
+                    <div class="mt-5 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        (click)="openSubcategoryProducts(selectedGroup.category.id, subcategory.slug)"
+                        class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+                      >
+                        Ver productos
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="deleteSubcategory(subcategory)"
+                        class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </article>
+                }
+              </div>
+            } @else {
+              <article class="mt-6 rounded-[1.6rem] border border-dashed border-black/15 bg-surface-panel px-5 py-8 text-sm leading-7 text-neutral-600">
+                Todavía no hay subcategorías en esta categoría. Crea la primera desde aquí.
+              </article>
+            }
+          </section>
+        }
+      } @else {
+        <article class="mt-6 rounded-[1.6rem] border border-dashed border-black/15 bg-surface-panel px-5 py-8 text-sm leading-7 text-neutral-600">
+          No hay categorías cargadas todavía. Crea las secciones base del catálogo desde aquí.
+        </article>
+      }
+    </article>
+
+    <article
+      #editorPanel
+      class="rounded-[2rem] border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:p-6 lg:sticky lg:top-4 lg:self-start lg:my-4 lg:h-[calc(100svh-2rem)] lg:overflow-y-auto"
+    >
+      <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Formulario</p>
+      <div class="mt-3 flex items-center justify-between gap-4">
+        <h2 class="text-2xl font-medium uppercase tracking-[0.14em] text-neutral-950">
+          {{ isEditing() ? 'Editar categoría' : 'Nueva categoría' }}
+        </h2>
+
+        @if (isEditing()) {
+          <button
+            type="button"
+            (click)="startCreate()"
+            class="text-xs uppercase tracking-[0.22em] text-neutral-500 transition hover:text-neutral-950"
+          >
+            Limpiar
+          </button>
+        }
+      </div>
+
+      <form class="mt-6 space-y-5" [formGroup]="form" (ngSubmit)="submit()">
+        <label class="block space-y-2">
+          <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Nombre</span>
+          <input
+            type="text"
+            formControlName="name"
+            class="w-full rounded-[1.1rem] border border-black/10 bg-surface-panel px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+            placeholder="Women"
+          />
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Descripción</span>
+          <textarea
+            rows="6"
+            formControlName="description"
+            class="w-full rounded-[1.1rem] border border-black/10 bg-surface-panel px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+            placeholder="Describe el enfoque visual de la categoría."
+          ></textarea>
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">URL banner</span>
+          <input
+            type="url"
+            formControlName="imageUrl"
+            (input)="onImageUrlInput()"
+            class="w-full rounded-[1.1rem] border border-black/10 bg-surface-panel px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+            placeholder="https://..."
+          />
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Archivo banner</span>
+          <input
+            type="file"
+            accept="image/*"
+            (change)="onImageFileChange($event)"
+            class="block w-full rounded-[1.1rem] border border-dashed border-black/15 bg-surface-panel px-4 py-4 text-sm text-neutral-600"
+          />
+        </label>
+
+        @if (imagePreview()) {
+          <article class="overflow-hidden rounded-[1.5rem] border border-black/10 bg-surface-panel">
+            <img
+              [src]="imagePreview()!"
+              alt="Vista previa categoría"
+              class="aspect-[16/9] w-full object-cover"
+            />
+          </article>
+
+          <button
+            type="button"
+            (click)="clearImage()"
+            class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-700 transition hover:border-black hover:text-black"
+          >
+            Quitar banner
+          </button>
+        }
+
+        <div class="grid gap-3 pt-2 sm:grid-cols-2">
+          <button
+            type="submit"
+            [disabled]="saving()"
+            class="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {{ saving() ? 'Guardando...' : isEditing() ? 'Actualizar categoría' : 'Crear categoría' }}
+          </button>
+
+          <button
+            type="button"
+            (click)="startCreate()"
+            class="inline-flex items-center justify-center rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+          >
+            Nuevo limpio
+          </button>
+        </div>
+      </form>
+    </article>
+  </section>
+</section>
