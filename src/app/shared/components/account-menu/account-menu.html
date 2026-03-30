@@ -5,18 +5,11 @@
     [attr.aria-expanded]="isOpen()"
     aria-haspopup="true"
     aria-label="Menú de usuario"
-    class="relative inline-flex items-center justify-center py-2 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100"
-    [class.text-black]="dark()"
-    [class.text-white]="!dark()"
-    [class.after:bg-black]="dark()"
-    [class.after:bg-white]="!dark()"
+    class="relative inline-flex items-center justify-center py-2 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-[var(--account-menu-accent)] after:transition-transform after:duration-300 hover:after:scale-x-100"
+    [style.color]="accent() === 'danger' ? 'var(--color-danger-600)' : dark() ? 'var(--color-black)' : 'var(--color-white)'"
+    [style.--account-menu-accent]="accent() === 'danger' ? 'var(--color-danger-600)' : dark() ? 'var(--color-black)' : 'var(--color-white)'"
   >
-    <app-icon
-      name="user"
-      class="h-7 w-7"
-      [class.text-black]="dark()"
-      [class.text-white]="!dark()"
-    ></app-icon>
+    <app-icon name="user" class="h-7 w-7"></app-icon>
   </button>
 
   @if (isOpen()) {

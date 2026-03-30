@@ -15,10 +15,12 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin, merge } from 'rxjs';
+import { resolveProductSubcategory } from '../../../../core/constants/category-subcategories.constants';
 import {
   AdminCategory,
   AdminProduct,
   AdminProductInput,
+  AdminSubcategory,
 } from '../../../../core/interfaces/admin.interface';
 import { AdminSubcategoryStoreService } from '../../../../core/services/admin-subcategory-store.service';
 import { AdminService } from '../../../../core/services/admin.service';
@@ -138,6 +140,7 @@ export class AdminProductManager implements OnDestroy {
     price: [null as number | null, [Validators.required, Validators.min(0.01)]],
     stock: [50, [Validators.required, Validators.min(0)]],
     categoryId: [null as number | null, [Validators.required]],
+    subcategorySlug: [null as string | null],
     imageUrl: [''],
   });
 
@@ -145,6 +148,10 @@ export class AdminProductManager implements OnDestroy {
     merge(this.form.controls.categoryId.valueChanges, this.form.controls.name.valueChanges)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.syncGeneratedSku());
+
+    this.form.controls.categoryId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.ensureValidSubcategorySelection());
 
     effect(() => {
       const fixedCategoryId = this.fixedCategoryId();
@@ -159,6 +166,7 @@ export class AdminProductManager implements OnDestroy {
       ) {
         this.form.patchValue({ categoryId: fixedCategoryId }, { emitEvent: false });
         this.syncGeneratedSku();
+        this.ensureValidSubcategorySelection();
       }
 
       this.lastFilterKey = filterKey;
@@ -206,6 +214,7 @@ export class AdminProductManager implements OnDestroy {
           }
 
           this.syncGeneratedSku();
+          this.ensureValidSubcategorySelection();
         },
         error: () => {
           this.products.set([]);
@@ -232,8 +241,10 @@ export class AdminProductManager implements OnDestroy {
       price: null,
       stock: 50,
       categoryId: defaultCategoryId,
+      subcategorySlug: this.resolveDefaultSubcategorySlug(defaultCategoryId),
       imageUrl: '',
     });
+    this.ensureValidSubcategorySelection();
   }
 
   startEdit(product: AdminProduct): void {
@@ -249,9 +260,11 @@ export class AdminProductManager implements OnDestroy {
       price: product.price,
       stock: product.stock ?? 0,
       categoryId: product.categoryId,
+      subcategorySlug: this.resolveProductSubcategorySlug(product),
       imageUrl: product.imageUrl ?? '',
     });
     this.syncGeneratedSku();
+    this.ensureValidSubcategorySelection();
     this.setPreview(product.imageUrl);
     this.scrollEditorIntoView();
   }
@@ -289,6 +302,27 @@ export class AdminProductManager implements OnDestroy {
 
   displayCategory(product: AdminProduct): string {
     return product.categoryName?.trim() || 'Sin categoría';
+  }
+
+  availableSubcategories(categoryId?: number | null): readonly AdminSubcategory[] {
+    const resolvedCategoryId =
+      categoryId === undefined
+        ? this.normalizeCategoryId(this.fixedCategoryId() ?? this.form.controls.categoryId.value)
+        : this.normalizeCategoryId(categoryId);
+
+    if (resolvedCategoryId === null) {
+      return [];
+    }
+
+    return this.subcategoryStore.listByCategory(
+      resolvedCategoryId,
+      this.categories(),
+      this.products(),
+    );
+  }
+
+  showSubcategoryField(): boolean {
+    return this.availableSubcategories().length > 0;
   }
 
   displayPrice(price: number | null): string {
@@ -658,19 +692,110 @@ export class AdminProductManager implements OnDestroy {
   }
 
   private syncProductSubcategory(product: AdminProduct, categoryId: number): void {
-    const fixedSubcategory = this.fixedSubcategory();
-
-    if (!fixedSubcategory) {
-      return;
-    }
-
     this.subcategoryStore.saveProductAssignment(
       product.id,
       categoryId,
-      fixedSubcategory,
+      this.resolveSelectedSubcategorySlug(categoryId),
       this.categories(),
       [...this.products(), product],
     );
+  }
+
+  private ensureValidSubcategorySelection(): void {
+    const categoryId = this.normalizeCategoryId(this.fixedCategoryId() ?? this.form.controls.categoryId.value);
+    const availableSubcategories = this.availableSubcategories(categoryId);
+    const availableSlugs = new Set(availableSubcategories.map((subcategory) => subcategory.slug));
+    const currentSlug = this.normalizeSubcategorySlug(this.form.controls.subcategorySlug.value);
+    const defaultSlug = this.resolveDefaultSubcategorySlug(categoryId);
+    const nextSlug =
+      currentSlug && availableSlugs.has(currentSlug)
+        ? currentSlug
+        : defaultSlug && availableSlugs.has(defaultSlug)
+          ? defaultSlug
+          : null;
+
+    if (currentSlug === nextSlug) {
+      return;
+    }
+
+    this.form.patchValue({ subcategorySlug: nextSlug }, { emitEvent: false });
+  }
+
+  private resolveProductSubcategorySlug(product: AdminProduct): string | null {
+    const assignedSubcategory = this.subcategoryStore.getAssignedSubcategorySlug(
+      product.id,
+      product.categoryId,
+      this.categories(),
+      this.products(),
+    );
+
+    return (
+      this.normalizeSubcategorySlug(assignedSubcategory) ??
+      this.inferDefaultSubcategorySlug(product.categoryId, {
+        name: product.name,
+        description: product.description,
+        sku: product.sku,
+      })
+    );
+  }
+
+  private resolveSelectedSubcategorySlug(categoryId: number): string | null {
+    const selectedSlug = this.normalizeSubcategorySlug(this.form.controls.subcategorySlug.value);
+
+    if (!selectedSlug) {
+      return null;
+    }
+
+    return this.availableSubcategories(categoryId).some(
+      (subcategory) => subcategory.slug === selectedSlug,
+    )
+      ? selectedSlug
+      : null;
+  }
+
+  private resolveDefaultSubcategorySlug(categoryId: number | null): string | null {
+    return this.inferDefaultSubcategorySlug(categoryId, {
+      name: this.form.controls.name.value ?? '',
+      description: this.form.controls.description.value ?? '',
+      sku: this.form.controls.sku.value ?? '',
+    });
+  }
+
+  private inferDefaultSubcategorySlug(
+    categoryId: number | null,
+    productLike: Pick<AdminProduct, 'name' | 'description' | 'sku'>,
+  ): string | null {
+    const availableSubcategories = this.availableSubcategories(categoryId);
+    const fixedSubcategory = this.normalizeSubcategorySlug(this.fixedSubcategory());
+
+    if (!availableSubcategories.length) {
+      return null;
+    }
+
+    if (
+      fixedSubcategory &&
+      availableSubcategories.some((subcategory) => subcategory.slug === fixedSubcategory)
+    ) {
+      return fixedSubcategory;
+    }
+
+    const inferredSubcategory = resolveProductSubcategory(productLike);
+
+    if (availableSubcategories.some((subcategory) => subcategory.slug === inferredSubcategory)) {
+      return inferredSubcategory;
+    }
+
+    return availableSubcategories[0]?.slug ?? null;
+  }
+
+  private normalizeCategoryId(value: unknown): number | null {
+    const categoryId = Number(value);
+    return Number.isInteger(categoryId) && categoryId > 0 ? categoryId : null;
+  }
+
+  private normalizeSubcategorySlug(value: string | null | undefined): string | null {
+    const normalizedValue = value?.trim();
+    return normalizedValue ? normalizedValue : null;
   }
 
   private scrollEditorIntoView(): void {

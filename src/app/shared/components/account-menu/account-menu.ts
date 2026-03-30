@@ -12,6 +12,7 @@ import { IconComponent } from '../icon/icon';
 })
 export class AccountMenuComponent {
   readonly dark = input(false);
+  readonly accent = input<'default' | 'danger'>('default');
   readonly panelAlign = input<'left' | 'right'>('right');
   readonly authService = inject(AuthService);
   readonly isOpen = signal(false);
