@@ -242,14 +242,25 @@ export class AdminCategories implements OnDestroy {
     }
 
     const rawValue = this.form.getRawValue();
+    const selectedCategoryId = this.selectedCategoryId();
+    const selectedCategory =
+      selectedCategoryId === null
+        ? null
+        : this.categories().find((category) => category.id === selectedCategoryId) ?? null;
+    const normalizedImageUrl = rawValue.imageUrl?.trim() || '';
+    const removeImage =
+      selectedCategory !== null &&
+      !!selectedCategory.imageUrl &&
+      !this.imageFile() &&
+      !normalizedImageUrl;
     const payload: AdminCategoryInput = {
       name: rawValue.name?.trim() || '',
       description: rawValue.description?.trim() || '',
-      imageUrl: rawValue.imageUrl?.trim() || null,
+      imageUrl: normalizedImageUrl || null,
       imageFile: this.imageFile(),
+      removeImage,
     };
 
-    const selectedCategoryId = this.selectedCategoryId();
     const request$ =
       selectedCategoryId === null
         ? this.adminService.createCategory(payload)

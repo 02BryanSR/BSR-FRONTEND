@@ -227,6 +227,10 @@ export class AdminService {
       formData.append('image', payload.imageFile);
     }
 
+    if (payload.removeImage) {
+      formData.append('removeImage', 'true');
+    }
+
     return formData;
   }
 
@@ -244,6 +248,10 @@ export class AdminService {
 
     if (payload.imageFile) {
       formData.append('image', payload.imageFile);
+    }
+
+    if (payload.removeImage) {
+      formData.append('removeImage', 'true');
     }
 
     return formData;
@@ -275,7 +283,33 @@ export class AdminService {
       return null;
     }
 
-    return normalizedValue;
+    return this.resolveManagedUploadPath(normalizedValue) ?? normalizedValue;
+  }
+
+  private resolveManagedUploadPath(value: string): string | null {
+    const trimmedValue = value.trim();
+    const directPath = this.stripQueryAndHash(trimmedValue);
+
+    if (directPath.startsWith('/uploads/')) {
+      return directPath;
+    }
+
+    try {
+      const assetUrl = new URL(trimmedValue);
+      const apiUrl = new URL(API_BASE_URL);
+
+      if (assetUrl.origin !== apiUrl.origin || !assetUrl.pathname.startsWith('/uploads/')) {
+        return null;
+      }
+
+      return assetUrl.pathname;
+    } catch {
+      return null;
+    }
+  }
+
+  private stripQueryAndHash(value: string): string {
+    return value.split(/[?#]/, 1)[0] || value;
   }
 
   private mapCat(input: unknown): AdminCategory {

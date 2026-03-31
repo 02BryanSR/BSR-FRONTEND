@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   CATEGORY_SUBCATEGORY_OPTIONS,
-  filterProductsBySubcategory,
+  resolveProductSubcategory,
   supportsCategorySubcategories,
 } from '../constants/category-subcategories.constants';
 import { type CatalogSubcategorySlug, type CategorySlug } from '../interfaces/catalog.interface';
@@ -61,6 +61,10 @@ export class AdminSubcategoryStoreService {
     categories: readonly AdminCategory[],
     products: readonly AdminProduct[] = [],
   ): Readonly<Record<number, string>> {
+    if (!categories.length || !products.length) {
+      return {};
+    }
+
     const subcategories = this.ensureBootstrapped(categories, products);
     const validAssignments = new Set(
       subcategories.map((subcategory) => this.buildAssignmentValue(subcategory.categoryId, subcategory.slug)),
@@ -95,6 +99,33 @@ export class AdminSubcategoryStoreService {
     categories: readonly AdminCategory[],
     products: readonly AdminProduct[] = [],
   ): string | null {
+    const storedSlug = this.getStoredSubcategorySlug(productId, categoryId, categories, products);
+
+    if (storedSlug) {
+      return storedSlug;
+    }
+
+    if (categoryId === null) {
+      return null;
+    }
+
+    const product = products.find(
+      (candidate) => candidate.id === productId && candidate.categoryId === categoryId,
+    );
+
+    if (!product) {
+      return null;
+    }
+
+    return this.inferSubcategorySlug(product, this.listByCategory(categoryId, categories, products));
+  }
+
+  getStoredSubcategorySlug(
+    productId: number,
+    categoryId: number | null,
+    categories: readonly AdminCategory[],
+    products: readonly AdminProduct[] = [],
+  ): string | null {
     if (categoryId === null) {
       return null;
     }
@@ -106,7 +137,12 @@ export class AdminSubcategoryStoreService {
     }
 
     const { categoryId: assignedCategoryId, slug } = this.parseAssignmentValue(assignment);
-    return assignedCategoryId === categoryId ? slug : null;
+
+    if (assignedCategoryId === categoryId) {
+      return slug;
+    }
+
+    return null;
   }
 
   createSubcategory(
@@ -215,6 +251,10 @@ export class AdminSubcategoryStoreService {
     categories: readonly AdminCategory[],
     products: readonly AdminProduct[],
   ): readonly AdminSubcategory[] {
+    if (!categories.length) {
+      return this.readSubcategories();
+    }
+
     const validCategoryIds = new Set(categories.map((category) => category.id));
     const currentSubcategories = this.readSubcategories().filter((subcategory) =>
       validCategoryIds.has(subcategory.categoryId),
@@ -243,40 +283,8 @@ export class AdminSubcategoryStoreService {
       this.writeSubcategories(nextSubcategories);
     }
 
-    const validAssignments = new Set(
-      nextSubcategories.map((subcategory) =>
-        this.buildAssignmentValue(subcategory.categoryId, subcategory.slug),
-      ),
-    );
-    const currentAssignments = this.readAssignments();
-    const nextAssignments: StoredAssignments = {};
-    let assignmentsChanged = false;
-
-    for (const product of products) {
-      const productKey = String(product.id);
-      const existingAssignment = currentAssignments[productKey];
-
-      if (existingAssignment && validAssignments.has(existingAssignment)) {
-        nextAssignments[productKey] = existingAssignment;
-        continue;
-      }
-
-      const inferredAssignment = this.inferAssignmentValue(product, nextSubcategories);
-
-      if (inferredAssignment) {
-        nextAssignments[productKey] = inferredAssignment;
-      }
-
-      if (existingAssignment !== inferredAssignment) {
-        assignmentsChanged = true;
-      }
-    }
-
-    if (
-      assignmentsChanged ||
-      Object.keys(nextAssignments).length !== Object.keys(currentAssignments).length
-    ) {
-      this.writeAssignments(nextAssignments);
+    if (!products.length) {
+      return nextSubcategories;
     }
 
     return nextSubcategories;
@@ -299,7 +307,7 @@ export class AdminSubcategoryStoreService {
     );
   }
 
-  private inferAssignmentValue(
+  private inferSubcategorySlug(
     product: AdminProduct,
     subcategories: readonly AdminSubcategory[],
   ): string | null {
@@ -307,19 +315,13 @@ export class AdminSubcategoryStoreService {
       return null;
     }
 
-    const categorySubcategories = subcategories.filter(
-      (subcategory) => subcategory.categoryId === product.categoryId,
-    );
-    const defaultSubcategories = categorySubcategories.filter((subcategory) =>
+    const defaultSubcategories = subcategories.filter((subcategory) =>
       ['superiores', 'inferiores', 'conjuntos', 'calzado'].includes(subcategory.slug),
     );
+    const inferredSlug = resolveProductSubcategory(product);
 
-    for (const subcategory of defaultSubcategories) {
-      const defaultSlug = subcategory.slug as Exclude<CatalogSubcategorySlug, 'all'>;
-
-      if (filterProductsBySubcategory([product], defaultSlug).length) {
-        return this.buildAssignmentValue(product.categoryId, subcategory.slug);
-      }
+    if (defaultSubcategories.some((subcategory) => subcategory.slug === inferredSlug)) {
+      return inferredSlug;
     }
 
     return null;

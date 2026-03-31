@@ -20,6 +20,7 @@ export interface AdminCategoryInput {
   description: string;
   imageUrl: string | null;
   imageFile: File | null;
+  removeImage?: boolean;
 }
 
 export interface AdminProduct {
@@ -45,6 +46,7 @@ export interface AdminProductInput {
   categoryId: number;
   imageUrl: string | null;
   imageFile: File | null;
+  removeImage?: boolean;
 }
 
 export interface AdminSubcategory {

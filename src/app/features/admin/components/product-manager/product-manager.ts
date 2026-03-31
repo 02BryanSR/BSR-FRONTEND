@@ -440,6 +440,17 @@ export class AdminProductManager implements OnDestroy {
 
     this.form.patchValue({ sku: resolvedSku }, { emitEvent: false });
 
+    const selectedProduct =
+      selectedProductId === null
+        ? null
+        : this.products().find((product) => product.id === selectedProductId) ?? null;
+    const normalizedImageUrl = rawValue.imageUrl?.trim() || '';
+    const removeImage =
+      selectedProduct !== null &&
+      !!selectedProduct.imageUrl &&
+      !this.imageFile() &&
+      !normalizedImageUrl;
+
     const payload: AdminProductInput = {
       name: rawValue.name?.trim() || '',
       sku: resolvedSku,
@@ -447,8 +458,9 @@ export class AdminProductManager implements OnDestroy {
       price,
       stock: Number(rawValue.stock ?? 0),
       categoryId,
-      imageUrl: rawValue.imageUrl?.trim() || null,
+      imageUrl: normalizedImageUrl || null,
       imageFile: this.imageFile(),
+      removeImage,
     };
 
     const request$ =
@@ -706,13 +718,19 @@ export class AdminProductManager implements OnDestroy {
     const availableSubcategories = this.availableSubcategories(categoryId);
     const availableSlugs = new Set(availableSubcategories.map((subcategory) => subcategory.slug));
     const currentSlug = this.normalizeSubcategorySlug(this.form.controls.subcategorySlug.value);
+    const fixedSlug = this.normalizeSubcategorySlug(this.fixedSubcategory());
+    const storedSlug = this.resolveStoredSubcategorySlug(categoryId);
     const defaultSlug = this.resolveDefaultSubcategorySlug(categoryId);
     const nextSlug =
       currentSlug && availableSlugs.has(currentSlug)
         ? currentSlug
-        : defaultSlug && availableSlugs.has(defaultSlug)
-          ? defaultSlug
-          : null;
+        : fixedSlug && availableSlugs.has(fixedSlug)
+          ? fixedSlug
+          : storedSlug && availableSlugs.has(storedSlug)
+            ? storedSlug
+          : defaultSlug && availableSlugs.has(defaultSlug)
+            ? defaultSlug
+            : availableSubcategories[0]?.slug ?? null;
 
     if (currentSlug === nextSlug) {
       return;
@@ -741,16 +759,31 @@ export class AdminProductManager implements OnDestroy {
 
   private resolveSelectedSubcategorySlug(categoryId: number): string | null {
     const selectedSlug = this.normalizeSubcategorySlug(this.form.controls.subcategorySlug.value);
+    const fixedSubcategory = this.normalizeSubcategorySlug(this.fixedSubcategory());
+    const storedSlug = this.resolveStoredSubcategorySlug(categoryId);
 
-    if (!selectedSlug) {
-      return null;
+    if (
+      selectedSlug &&
+      this.availableSubcategories(categoryId).some((subcategory) => subcategory.slug === selectedSlug)
+    ) {
+      return selectedSlug;
     }
 
-    return this.availableSubcategories(categoryId).some(
-      (subcategory) => subcategory.slug === selectedSlug,
-    )
-      ? selectedSlug
-      : null;
+    if (
+      fixedSubcategory &&
+      this.availableSubcategories(categoryId).some((subcategory) => subcategory.slug === fixedSubcategory)
+    ) {
+      return fixedSubcategory;
+    }
+
+    if (
+      storedSlug &&
+      this.availableSubcategories(categoryId).some((subcategory) => subcategory.slug === storedSlug)
+    ) {
+      return storedSlug;
+    }
+
+    return this.resolveDefaultSubcategorySlug(categoryId) ?? this.availableSubcategories(categoryId)[0]?.slug ?? null;
   }
 
   private resolveDefaultSubcategorySlug(categoryId: number | null): string | null {
@@ -796,6 +829,23 @@ export class AdminProductManager implements OnDestroy {
   private normalizeSubcategorySlug(value: string | null | undefined): string | null {
     const normalizedValue = value?.trim();
     return normalizedValue ? normalizedValue : null;
+  }
+
+  private resolveStoredSubcategorySlug(categoryId: number | null): string | null {
+    const productId = this.selectedProductId();
+
+    if (productId === null) {
+      return null;
+    }
+
+    return this.normalizeSubcategorySlug(
+      this.subcategoryStore.getStoredSubcategorySlug(
+        productId,
+        categoryId,
+        this.categories(),
+        this.products(),
+      ),
+    );
   }
 
   private scrollEditorIntoView(): void {

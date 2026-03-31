@@ -14,10 +14,14 @@ export const CATEGORY_SUBCATEGORY_OPTIONS: readonly CategorySubcategoryOption[] 
 ];
 
 type SubcategoryProductLike = {
+  id?: number | null;
   name: string;
   description: string;
+  categoryId?: number | null;
   sku: string | null;
 };
+
+const PRODUCT_SUBCATEGORY_STORAGE_KEY = 'bsr.admin.product-subcategories.v1';
 
 const SUBCATEGORY_KEYWORDS: Record<Exclude<CatalogSubcategorySlug, 'all'>, readonly string[]> = {
   superiores: [
@@ -71,10 +75,7 @@ const SUBCATEGORY_KEYWORDS: Record<Exclude<CatalogSubcategorySlug, 'all'>, reado
     'pijama',
     'romper',
     'set',
-    'suit',
     'total look',
-    'traje',
-    'trajes',
     'tracksuit',
     'vestido',
   ],
@@ -144,6 +145,12 @@ export function filterProductsBySubcategory<T extends SubcategoryProductLike>(
 export function resolveProductSubcategory(
   product: SubcategoryProductLike,
 ): CatalogSubcategorySlug {
+  const storedSubcategory = readStoredProductSubcategory(product);
+
+  if (storedSubcategory) {
+    return storedSubcategory;
+  }
+
   const searchableText = normalizeText([product.name, product.description, product.sku].join(' '));
 
   if (!searchableText) {
@@ -157,6 +164,62 @@ export function resolveProductSubcategory(
   }
 
   return 'superiores';
+}
+
+function readStoredProductSubcategory(
+  product: SubcategoryProductLike,
+): Exclude<CatalogSubcategorySlug, 'all'> | null {
+  if (typeof localStorage === 'undefined') {
+    return null;
+  }
+
+  const productId =
+    typeof product.id === 'number' && Number.isInteger(product.id) && product.id > 0
+      ? product.id
+      : null;
+  const categoryId =
+    typeof product.categoryId === 'number' &&
+    Number.isInteger(product.categoryId) &&
+    product.categoryId > 0
+      ? product.categoryId
+      : null;
+
+  if (productId === null || categoryId === null) {
+    return null;
+  }
+
+  try {
+    const rawValue = localStorage.getItem(PRODUCT_SUBCATEGORY_STORAGE_KEY);
+
+    if (!rawValue) {
+      return null;
+    }
+
+    const parsedValue = JSON.parse(rawValue) as unknown;
+
+    if (!parsedValue || typeof parsedValue !== 'object') {
+      return null;
+    }
+
+    const assignmentValue = (parsedValue as Record<string, unknown>)[String(productId)];
+
+    if (typeof assignmentValue !== 'string') {
+      return null;
+    }
+
+    const [rawCategoryId, rawSlug] = assignmentValue.split(':', 2);
+    const assignedCategoryId = Number(rawCategoryId);
+
+    if (!Number.isInteger(assignedCategoryId) || assignedCategoryId !== categoryId) {
+      return null;
+    }
+
+    const normalizedSlug = normalizeCategorySubcategory(rawSlug);
+
+    return normalizedSlug === 'all' ? null : normalizedSlug;
+  } catch {
+    return null;
+  }
 }
 
 function normalizeText(value: string | null | undefined): string {
