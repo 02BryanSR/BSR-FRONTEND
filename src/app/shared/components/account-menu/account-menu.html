@@ -5,7 +5,7 @@
     [attr.aria-expanded]="isOpen()"
     aria-haspopup="true"
     aria-label="Menú de usuario"
-    class="relative inline-flex items-center justify-center py-2 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-[var(--account-menu-accent)] after:transition-transform after:duration-300 hover:after:scale-x-100"
+    class="relative inline-flex items-center justify-center py-2 after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-(--account-menu-accent) after:transition-transform after:duration-300 hover:after:scale-x-100"
     [style.color]="accent() === 'danger' ? 'var(--color-danger-600)' : dark() ? 'var(--color-black)' : 'var(--color-white)'"
     [style.--account-menu-accent]="accent() === 'danger' ? 'var(--color-danger-600)' : dark() ? 'var(--color-black)' : 'var(--color-white)'"
   >
@@ -14,7 +14,7 @@
 
   @if (isOpen()) {
     <section
-      class="absolute z-50 mt-3 w-80 overflow-hidden rounded-[1.5rem] bg-surface-panel shadow-xl"
+      class="absolute z-50 mt-3 w-80 overflow-hidden rounded-3xl bg-surface-panel shadow-xl"
       [class.left-0]="panelAlign() === 'left'"
       [class.origin-top-left]="panelAlign() === 'left'"
       [class.right-0]="panelAlign() === 'right'"
@@ -86,9 +86,9 @@
           </nav>
         } @else {
           <header>
-            <p class="text-sm text-neutral-500">Todavía no has iniciado sesión.</p>
-            <strong class="mt-1 block text-base font-semibold text-neutral-900">
-              Identifícate para acceder a tu carrito, favoritos, direcciones y el historial de compra.
+            <p class="text-lg text-neutral-500">Todavía no has iniciado sesión.</p>
+            <strong class="mt-1 block text-sm font-semibold text-neutral-900">
+              Accede al carrito, favoritos, direcciones y el historial de compra.
             </strong>
           </header>
 

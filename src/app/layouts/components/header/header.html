@@ -28,13 +28,13 @@
 
               @if (openNavRoute() === link.route) {
                 <div
-                  class="absolute left-0 top-[calc(100%+0.75rem)] z-50 min-w-52 overflow-hidden rounded-[1.5rem] border border-black/10 bg-white p-2 text-black shadow-[0_24px_60px_rgba(15,23,42,0.18)]"
+                  class="absolute left-0 top-[calc(100%+0.75rem)] z-50 min-w-52 overflow-hidden rounded-3xl border border-black/10 bg-white p-2 text-black shadow-[0_24px_60px_rgba(15,23,42,0.18)]"
                 >
                   @for (subcategory of subcategoryOptions; track subcategory.slug) {
                     <a
                       [routerLink]="link.route"
                       [queryParams]="getSubcategoryQueryParams(subcategory.slug)"
-                      class="flex items-center rounded-[1rem] px-3 py-3 text-[11px] uppercase tracking-[0.18em] text-neutral-900 transition hover:bg-black/4"
+                      class="flex items-center rounded-2xl px-3 py-3 text-[11px] uppercase tracking-[0.18em] text-neutral-900 transition hover:bg-black/4"
                       (click)="closeNavDropdown()"
                     >
                       {{ subcategory.label }}
@@ -91,7 +91,7 @@
 
       <div #searchShell class="relative h-10 w-10 shrink-0">
         <div
-          class="pointer-events-none absolute right-0 top-1/2 z-20 h-10 w-40 origin-right -translate-y-1/2 overflow-hidden rounded-full border border-black/10 bg-white/95 shadow-[0_12px_35px_rgba(15,23,42,0.14)] transition-all duration-300 ease-out"
+          class="pointer-events-none absolute right-0 top-1/2 z-20 h-10 w-70 origin-right -translate-y-1/2 overflow-hidden rounded-full border border-black/10 bg-white/95 shadow-[0_12px_35px_rgba(15,23,42,0.14)] transition-all duration-300 ease-out"
           [class.scale-x-0]="!searchOpen()"
           [class.scale-x-100]="searchOpen()"
           [class.opacity-0]="!searchOpen()"
@@ -169,7 +169,7 @@
               </div>
             } @else {
               <div class="px-5 py-6 text-sm normal-case tracking-[0.04em] text-black/55">
-                No se encontraron coincidencias para �{{ searchQuery().trim() }}�.
+                No se encontraron coincidencias para {{ searchQuery().trim() }}.
               </div>
             }
           </div>
