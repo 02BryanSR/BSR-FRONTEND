@@ -15,4 +15,9 @@ export const PRIMARY_NAV_LINKS: readonly NavigationLink[] = [
   { label: 'ACCESSORIES', route: '/accessories', categorySlug: 'accessories' },
 ];
 
-export const HIDDEN_LAYOUT_ROUTES = ['/login', '/register', '/forgot-password'] as const;
+export const HIDDEN_LAYOUT_ROUTES = [
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+] as const;

@@ -1,15 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize, take } from 'rxjs';
+import { API_ENDPOINTS } from '../../core/constants/api.constants';
 import { ToastService } from '../../core/services/toast.service';
+import { IconComponent } from '../../shared/components/icon/icon';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, IconComponent],
   templateUrl: './reset-password.html',
 })
 export class ResetPassword {
@@ -20,6 +22,8 @@ export class ResetPassword {
   private readonly toastService = inject(ToastService);
 
   readonly loading = signal(false);
+  readonly showPassword = signal(false);
+  readonly showConfirmPassword = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     password: ['', [Validators.required, Validators.minLength(6)]],
@@ -32,6 +36,14 @@ export class ResetPassword {
 
   get confirmPassword() {
     return this.form.controls.confirmPassword;
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update((value) => !value);
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword.update((value) => !value);
   }
 
   onSubmit(): void {
@@ -69,7 +81,7 @@ export class ResetPassword {
     this.loading.set(true);
 
     this.http
-      .post('/api/auth/reset-password', {
+      .post(API_ENDPOINTS.auth.resetPassword, {
         token,
         password,
       })
@@ -88,7 +100,13 @@ export class ResetPassword {
           this.form.reset();
           this.router.navigate(['/login']);
         },
-        error: () => {},
+        error: (error: HttpErrorResponse) => {
+          this.toastService.show({
+            type: 'error',
+            title: 'No se pudo restablecer la contrasena',
+            message: error.error?.message || 'El enlace puede haber expirado o ser invalido.',
+          });
+        },
       });
   }
 }

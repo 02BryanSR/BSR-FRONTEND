@@ -17,8 +17,9 @@ export class App {
   protected readonly title = signal('bsr-frontend');
   private readonly hiddenHeaderRoutes = new Set<string>(HIDDEN_LAYOUT_ROUTES);
   readonly currentUrl = signal(this.router.url);
+  readonly currentPath = computed(() => this.currentUrl().split(/[?#]/, 1)[0] || '/');
   readonly showHeader = computed(
-    () => !this.hiddenHeaderRoutes.has(this.currentUrl()) && !this.currentUrl().startsWith('/admin'),
+    () => !this.hiddenHeaderRoutes.has(this.currentPath()) && !this.currentPath().startsWith('/admin'),
   );
 
   constructor() {

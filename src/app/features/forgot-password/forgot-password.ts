@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize, take } from 'rxjs';
+import { API_ENDPOINTS } from '../../core/constants/api.constants';
 import { ToastService } from '../../core/services/toast.service';
 
 @Component({
@@ -42,7 +43,7 @@ export class ForgotPassword {
     this.loading.set(true);
 
     this.http
-      .post('/api/auth/forgot-password', { email })
+      .post(API_ENDPOINTS.auth.forgotPassword, { email })
       .pipe(
         take(1),
         finalize(() => this.loading.set(false))
@@ -57,7 +58,13 @@ export class ForgotPassword {
 
           this.form.reset();
         },
-        error: () => {},
+        error: (error: HttpErrorResponse) => {
+          this.toastService.show({
+            type: 'error',
+            title: 'No se pudo enviar el correo',
+            message: error.error?.message || 'No se pudo procesar la solicitud de recuperacion.',
+          });
+        },
       });
   }
 }
