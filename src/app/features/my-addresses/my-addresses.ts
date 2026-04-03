@@ -2,14 +2,16 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { ResolvedAddress } from '../../core/interfaces/address-autocomplete.interface';
 import { UserAddress, UserAddressInput } from '../../core/interfaces/shop.interface';
 import { ShopService } from '../../core/services/shop.service';
 import { ToastService } from '../../core/services/toast.service';
+import { AddressAutocompleteComponent } from '../../shared/components/address-autocomplete/address-autocomplete';
 
 @Component({
   selector: 'app-my-addresses',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, AddressAutocompleteComponent],
   templateUrl: './my-addresses.html',
 })
 export class MyAddresses {
@@ -138,5 +140,22 @@ export class MyAddresses {
           this.toastService.showError(error.error?.message ?? 'No se pudo eliminar la dirección.');
         },
       });
+  }
+
+  onAddressInputChange(value: string): void {
+    this.form.patchValue({ address: value }, { emitEvent: false });
+  }
+
+  onAddressResolved(resolved: ResolvedAddress): void {
+    this.form.patchValue(
+      {
+        address: resolved.address || resolved.formattedAddress,
+        city: resolved.city || this.form.getRawValue().city || '',
+        state: resolved.state || this.form.getRawValue().state || '',
+        country: resolved.country || this.form.getRawValue().country || '',
+        cp: resolved.cp || this.form.getRawValue().cp || '',
+      },
+      { emitEvent: false },
+    );
   }
 }

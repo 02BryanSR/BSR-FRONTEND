@@ -8,17 +8,25 @@ import {
   CheckoutPaymentIntent,
   CreateOrderInput,
   CreatePaymentIntentInput,
-  UserAddress,
   UserAddressInput,
+  UserAddress,
 } from '../../core/interfaces/shop.interface';
+import { ResolvedAddress } from '../../core/interfaces/address-autocomplete.interface';
 import { ShopService } from '../../core/services/shop.service';
 import { ToastService } from '../../core/services/toast.service';
+import { AddressAutocompleteComponent } from '../../shared/components/address-autocomplete/address-autocomplete';
 import { StripePaymentElementComponent } from '../../shared/components/stripe-payment-element/stripe-payment-element';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CurrencyPipe, ReactiveFormsModule, RouterLink, StripePaymentElementComponent],
+  imports: [
+    CurrencyPipe,
+    ReactiveFormsModule,
+    RouterLink,
+    StripePaymentElementComponent,
+    AddressAutocompleteComponent,
+  ],
   templateUrl: './checkout.html',
 })
 export class Checkout {
@@ -396,6 +404,14 @@ export class Checkout {
     this.paymentElementError.set(state.errorMessage);
   }
 
+  onQuickAddressInputChange(value: string): void {
+    this.quickAddressForm.patchValue({ address: value }, { emitEvent: false });
+  }
+
+  onQuickAddressResolved(resolved: ResolvedAddress): void {
+    this.applyResolvedAddressToQuickForm(resolved);
+  }
+
   formatMockCardNumber(event: Event): void {
     const input = event.target as HTMLInputElement;
     const digits = input.value.replace(/\D/g, '').slice(0, 16);
@@ -452,5 +468,18 @@ export class Checkout {
     }
 
     return 'Card';
+  }
+
+  private applyResolvedAddressToQuickForm(resolved: ResolvedAddress): void {
+    this.quickAddressForm.patchValue(
+      {
+        address: resolved.address || resolved.formattedAddress,
+        city: resolved.city || this.quickAddressForm.getRawValue().city || '',
+        state: resolved.state || this.quickAddressForm.getRawValue().state || '',
+        country: resolved.country || this.quickAddressForm.getRawValue().country || '',
+        cp: resolved.cp || this.quickAddressForm.getRawValue().cp || '',
+      },
+      { emitEvent: false },
+    );
   }
 }

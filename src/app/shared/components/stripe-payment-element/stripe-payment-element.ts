@@ -31,10 +31,34 @@ type CardFieldState = {
   ready: boolean;
 };
 
+type CardBrandPreset = {
+  number: string;
+  expiry: string;
+  cvc: string;
+};
+
 const INITIAL_FIELD_STATE: Record<CardFieldKey, CardFieldState> = {
   number: { complete: false, error: null, ready: false },
   expiry: { complete: false, error: null, ready: false },
   cvc: { complete: false, error: null, ready: false },
+};
+
+const CARD_BRAND_PRESETS: Record<TestCardBrand, CardBrandPreset> = {
+  visa: {
+    number: '4242 4242 4242 4242',
+    expiry: '12 / 34',
+    cvc: '123',
+  },
+  mastercard: {
+    number: '5555 5555 5555 4444',
+    expiry: '12 / 34',
+    cvc: '123',
+  },
+  amex: {
+    number: '3782 822463 10005',
+    expiry: '12 / 34',
+    cvc: '1234',
+  },
 };
 
 @Component({
@@ -64,7 +88,7 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
     { key: 'mastercard', label: 'Mastercard' },
     { key: 'amex', label: 'Amex' },
   ];
-  readonly selectedBrand = signal<TestCardBrand | null>(null);
+  readonly selectedBrand = signal<TestCardBrand>('visa');
 
   private stripe: Stripe | null = null;
   private elements: StripeElements | null = null;
@@ -150,6 +174,7 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
 
   selectBrand(brand: TestCardBrand): void {
     this.selectedBrand.set(brand);
+    this.applyBrandPreset(brand, true);
     this.cardNumberElement?.focus();
   }
 
@@ -191,6 +216,7 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
       }
 
       this.elements = this.stripe.elements();
+      const preset = this.getBrandPreset(this.selectedBrand());
 
       const baseStyle = {
         color: '#111111',
@@ -209,7 +235,7 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
 
       this.cardNumberElement = this.elements.create('cardNumber', {
         disableLink: true,
-        placeholder: '1234 1234 1234 1234',
+        placeholder: preset.number,
         showIcon: false,
         style: {
           base: baseStyle,
@@ -218,7 +244,7 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
       });
 
       this.cardExpiryElement = this.elements.create('cardExpiry', {
-        placeholder: 'MM / AA',
+        placeholder: preset.expiry,
         style: {
           base: baseStyle,
           invalid: invalidStyle,
@@ -226,7 +252,7 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
       });
 
       this.cardCvcElement = this.elements.create('cardCvc', {
-        placeholder: 'CVC',
+        placeholder: preset.cvc,
         style: {
           base: baseStyle,
           invalid: invalidStyle,
@@ -262,10 +288,9 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
       this.fieldState.number.complete = !!event.complete;
       this.fieldState.number.error = event.error?.message ?? null;
 
-      if (event.empty) {
-        this.selectedBrand.set(null);
-      } else if (event.brand === 'visa' || event.brand === 'mastercard' || event.brand === 'amex') {
+      if (event.brand === 'visa' || event.brand === 'mastercard' || event.brand === 'amex') {
         this.selectedBrand.set(event.brand);
+        this.applyBrandPreset(event.brand, false);
       }
 
       this.syncFieldState();
@@ -334,7 +359,7 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
     this.resetFieldState();
     this.ready.set(false);
     this.complete.set(false);
-    this.selectedBrand.set(null);
+    this.selectedBrand.set('visa');
     this.emitState();
   }
 
@@ -344,6 +369,34 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
       expiry: { ...INITIAL_FIELD_STATE.expiry },
       cvc: { ...INITIAL_FIELD_STATE.cvc },
     };
+  }
+
+  private applyBrandPreset(brand: TestCardBrand, clearValues: boolean): void {
+    const preset = this.getBrandPreset(brand);
+
+    this.cardNumberElement?.update({ placeholder: preset.number });
+    this.cardExpiryElement?.update({ placeholder: preset.expiry });
+    this.cardCvcElement?.update({ placeholder: preset.cvc });
+
+    if (clearValues) {
+      this.cardNumberElement?.clear();
+      this.cardExpiryElement?.clear();
+      this.cardCvcElement?.clear();
+
+      this.fieldState.number.complete = false;
+      this.fieldState.number.error = null;
+      this.fieldState.expiry.complete = false;
+      this.fieldState.expiry.error = null;
+      this.fieldState.cvc.complete = false;
+      this.fieldState.cvc.error = null;
+      this.errorMessage.set(null);
+      this.complete.set(false);
+      this.emitState();
+    }
+  }
+
+  private getBrandPreset(brand: TestCardBrand): CardBrandPreset {
+    return CARD_BRAND_PRESETS[brand];
   }
 
   private emitState(): void {

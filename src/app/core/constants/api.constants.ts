@@ -3,6 +3,9 @@
     __APP_CONFIG__?: {
       apiBaseUrl?: string;
       stripePublishableKey?: string;
+      geoapifyApiKey?: string;
+      geoapifyRegion?: string;
+      geoapifyLanguage?: string;
     };
   }
 }
@@ -25,6 +28,9 @@ function resolveApiBaseUrl(): string {
 
 export const API_BASE_URL = resolveApiBaseUrl();
 export const STRIPE_PUBLISHABLE_KEY = window.__APP_CONFIG__?.stripePublishableKey?.trim() || '';
+export const ADDRESS_LOOKUP_API_KEY = window.__APP_CONFIG__?.geoapifyApiKey?.trim() || '';
+export const ADDRESS_LOOKUP_REGION = window.__APP_CONFIG__?.geoapifyRegion?.trim() || 'ES';
+export const ADDRESS_LOOKUP_LANGUAGE = window.__APP_CONFIG__?.geoapifyLanguage?.trim() || 'es';
 
 export const API_ENDPOINTS = {
   auth: {
