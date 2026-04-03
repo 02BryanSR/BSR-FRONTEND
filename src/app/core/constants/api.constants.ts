@@ -3,6 +3,7 @@
     __APP_CONFIG__?: {
       apiBaseUrl?: string;
       stripePublishableKey?: string;
+      cardCheckoutMode?: string;
       geoapifyApiKey?: string;
       geoapifyRegion?: string;
       geoapifyLanguage?: string;
@@ -28,6 +29,8 @@ function resolveApiBaseUrl(): string {
 
 export const API_BASE_URL = resolveApiBaseUrl();
 export const STRIPE_PUBLISHABLE_KEY = window.__APP_CONFIG__?.stripePublishableKey?.trim() || '';
+const configuredCardCheckoutMode = window.__APP_CONFIG__?.cardCheckoutMode?.trim().toLowerCase();
+export const CARD_CHECKOUT_MODE = configuredCardCheckoutMode === 'stripe' ? 'stripe' : 'demo';
 export const ADDRESS_LOOKUP_API_KEY = window.__APP_CONFIG__?.geoapifyApiKey?.trim() || '';
 export const ADDRESS_LOOKUP_REGION = window.__APP_CONFIG__?.geoapifyRegion?.trim() || 'ES';
 export const ADDRESS_LOOKUP_LANGUAGE = window.__APP_CONFIG__?.geoapifyLanguage?.trim() || 'es';

@@ -3,15 +3,15 @@ import { Component, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { STRIPE_PUBLISHABLE_KEY } from '../../core/constants/api.constants';
+import { CARD_CHECKOUT_MODE, STRIPE_PUBLISHABLE_KEY } from '../../core/constants/api.constants';
+import { ResolvedAddress } from '../../core/interfaces/address-autocomplete.interface';
 import {
   CheckoutPaymentIntent,
   CreateOrderInput,
   CreatePaymentIntentInput,
-  UserAddressInput,
   UserAddress,
+  UserAddressInput,
 } from '../../core/interfaces/shop.interface';
-import { ResolvedAddress } from '../../core/interfaces/address-autocomplete.interface';
 import { ShopService } from '../../core/services/shop.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AddressAutocompleteComponent } from '../../shared/components/address-autocomplete/address-autocomplete';
@@ -53,14 +53,10 @@ export class Checkout {
   readonly paymentElementComplete = signal(false);
   readonly paymentElementError = signal<string | null>(null);
   readonly showQuickAddressForm = signal(false);
-  readonly stripeConfigured = !!STRIPE_PUBLISHABLE_KEY;
+  readonly cardCheckoutMode = CARD_CHECKOUT_MODE;
+  readonly stripeConfigured = this.cardCheckoutMode === 'demo' || !!STRIPE_PUBLISHABLE_KEY;
   readonly hasItems = computed(() => this.cart().items.length > 0);
   readonly hasAddresses = computed(() => this.addresses().length > 0);
-  readonly isCardPayment = computed(() => this.checkoutForm.getRawValue().payMethod === 'CARD');
-  readonly selectedAddress = computed(() => {
-    const selectedId = this.checkoutForm.getRawValue().addressId;
-    return this.addresses().find((address) => address.id === selectedId) ?? null;
-  });
 
   readonly checkoutForm = this.formBuilder.group({
     addressId: this.formBuilder.control<number | null>(null, Validators.required),
@@ -73,13 +69,6 @@ export class Checkout {
     country: ['', [Validators.required, Validators.maxLength(120)]],
     cp: ['', [Validators.required, Validators.maxLength(20)]],
     state: ['', [Validators.required, Validators.maxLength(120)]],
-  });
-
-  readonly mockCardForm = this.formBuilder.group({
-    cardholder: ['Nombre del cliente', [Validators.required, Validators.maxLength(60)]],
-    cardNumber: ['4242 4242 4242 4242', [Validators.required, Validators.maxLength(19)]],
-    expiry: ['12/34', [Validators.required, Validators.maxLength(5)]],
-    cvc: ['123', [Validators.required, Validators.maxLength(4)]],
   });
 
   constructor() {
@@ -175,7 +164,7 @@ export class Checkout {
       .subscribe({
         next: (address) => {
           this.toastService.show({
-            title: 'Dirección guardada',
+            title: 'Direccion guardada',
             message: 'Ya puedes usarla para completar tu pedido.',
           });
           this.showQuickAddressForm.set(false);
@@ -190,14 +179,14 @@ export class Checkout {
           this.checkoutForm.patchValue({ addressId: address.id });
         },
         error: (error) => {
-          this.toastService.showError(error.error?.message ?? 'No se pudo crear la dirección.');
+          this.toastService.showError(error.error?.message ?? 'No se pudo crear la direccion.');
         },
       });
   }
 
   async submitOrder(): Promise<void> {
     if (!this.hasItems()) {
-      this.toastService.showError('Tu carrito está vacío.');
+      this.toastService.showError('Tu carrito esta vacio.');
       void this.router.navigate(['/cart']);
       return;
     }
@@ -219,18 +208,37 @@ export class Checkout {
   }
 
   private async submitCardOrder(): Promise<void> {
-    if (!this.stripeConfigured) {
-      this.toastService.showError('Falta configurar Stripe en el frontend.');
+    if (!this.stripePaymentElement) {
+      this.toastService.showError('El formulario de pago no esta montado en la pagina.');
       return;
     }
 
     if (!this.paymentElementReady()) {
-      this.toastService.showError('El formulario de Stripe todavia no esta listo.');
+      this.toastService.showError('El formulario de pago todavia no esta listo.');
       return;
     }
 
-    if (!this.stripePaymentElement) {
-      this.toastService.showError('El formulario de Stripe no esta montado en la pagina.');
+    if (this.cardCheckoutMode === 'demo') {
+      const paymentResult = await this.stripePaymentElement.confirmPayment();
+
+      if (!paymentResult?.success) {
+        this.toastService.showError(
+          paymentResult?.errorMessage ||
+            this.paymentElementError() ||
+            'La tarjeta de prueba no paso la validacion del formulario.',
+        );
+        return;
+      }
+
+      this.createOrder({
+        addressId: this.checkoutForm.getRawValue().addressId ?? 0,
+        payMethod: this.checkoutForm.getRawValue().payMethod?.trim() || 'CARD',
+      });
+      return;
+    }
+
+    if (!this.stripeConfigured) {
+      this.toastService.showError('Falta configurar Stripe en el frontend.');
       return;
     }
 
@@ -257,7 +265,7 @@ export class Checkout {
     }
 
     if (!paymentIntent.paymentIntentId) {
-      this.toastService.showError('Stripe no devolvió un identificador de pago válido.');
+      this.toastService.showError('Stripe no devolvio un identificador de pago valido.');
       return;
     }
 
@@ -291,8 +299,11 @@ export class Checkout {
       .subscribe({
         next: (order) => {
           this.toastService.show({
-            title: 'Pedido creado',
-            message: `Tu pedido #${order.id} ya ha quedado registrado.`,
+            title: this.cardCheckoutMode === 'demo' && payload.payMethod === 'CARD' ? 'Pago simulado' : 'Pedido creado',
+            message:
+              this.cardCheckoutMode === 'demo' && payload.payMethod === 'CARD'
+                ? `La simulacion fue correcta y tu pedido #${order.id} ya ha quedado registrado.`
+                : `Tu pedido #${order.id} ya ha quedado registrado.`,
           });
           void this.router.navigate(['/my-orders']);
         },
@@ -314,10 +325,23 @@ export class Checkout {
       return;
     }
 
+    if (this.cardCheckoutMode === 'demo') {
+      this.paymentIntent.set(null);
+      this.preparedPaymentAddressId.set(null);
+      this.preparedPaymentMethod.set(null);
+      this.paymentIntentError.set(null);
+      this.preparingPayment.set(false);
+      return;
+    }
+
     await this.ensurePaymentIntent();
   }
 
   private async ensurePaymentIntent(reuseExisting = false): Promise<CheckoutPaymentIntent | null> {
+    if (this.cardCheckoutMode === 'demo') {
+      return null;
+    }
+
     if (!this.hasItems()) {
       this.paymentIntent.set(null);
       this.preparedPaymentAddressId.set(null);
@@ -341,11 +365,7 @@ export class Checkout {
       this.preparedPaymentAddressId() === addressId &&
       this.preparedPaymentMethod() === payMethod;
 
-    if (reuseExisting && canReuseCurrentIntent) {
-      return currentPaymentIntent;
-    }
-
-    if (!reuseExisting && canReuseCurrentIntent) {
+    if (canReuseCurrentIntent) {
       return currentPaymentIntent;
     }
 
@@ -370,7 +390,7 @@ export class Checkout {
               this.paymentIntent.set(null);
               this.preparedPaymentAddressId.set(null);
               this.preparedPaymentMethod.set(null);
-              this.paymentIntentError.set('El backend no devolvió un client secret válido.');
+              this.paymentIntentError.set('El backend no devolvio un client secret valido.');
               resolve(null);
               return;
             }
@@ -412,62 +432,13 @@ export class Checkout {
     this.applyResolvedAddressToQuickForm(resolved);
   }
 
-  formatMockCardNumber(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const digits = input.value.replace(/\D/g, '').slice(0, 16);
-    const formatted = digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
-    this.mockCardForm.patchValue({ cardNumber: formatted }, { emitEvent: false });
+  isCardPayment(): boolean {
+    return (this.checkoutForm.getRawValue().payMethod?.trim() || 'CARD') === 'CARD';
   }
 
-  formatMockExpiry(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const digits = input.value.replace(/\D/g, '').slice(0, 4);
-    const formatted =
-      digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
-    this.mockCardForm.patchValue({ expiry: formatted }, { emitEvent: false });
-  }
-
-  formatMockCvc(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const digits = input.value.replace(/\D/g, '').slice(0, 4);
-    this.mockCardForm.patchValue({ cvc: digits }, { emitEvent: false });
-  }
-
-  get mockCardholder(): string {
-    return (this.mockCardForm.getRawValue().cardholder || 'Nombre del cliente').trim();
-  }
-
-  get mockCardNumber(): string {
-    const digits = (this.mockCardForm.getRawValue().cardNumber || '').replace(/\D/g, '');
-    const padded = `${digits}${'•'.repeat(Math.max(0, 16 - digits.length))}`.slice(0, 16);
-    return padded.replace(/(.{4})/g, '$1 ').trim();
-  }
-
-  get mockExpiry(): string {
-    return (this.mockCardForm.getRawValue().expiry || 'MM/AA').trim() || 'MM/AA';
-  }
-
-  get mockCvc(): string {
-    const value = (this.mockCardForm.getRawValue().cvc || '').trim();
-    return value ? '•'.repeat(value.length) : '•••';
-  }
-
-  get mockCardBrand(): string {
-    const digits = (this.mockCardForm.getRawValue().cardNumber || '').replace(/\D/g, '');
-
-    if (/^3[47]/.test(digits)) {
-      return 'Amex';
-    }
-
-    if (/^5[1-5]/.test(digits) || /^2(2[2-9]|[3-6]\d|7[01])/.test(digits)) {
-      return 'Mastercard';
-    }
-
-    if (/^4/.test(digits)) {
-      return 'Visa';
-    }
-
-    return 'Card';
+  selectedAddress(): UserAddress | null {
+    const selectedId = this.checkoutForm.getRawValue().addressId;
+    return this.addresses().find((address) => address.id === selectedId) ?? null;
   }
 
   private applyResolvedAddressToQuickForm(resolved: ResolvedAddress): void {

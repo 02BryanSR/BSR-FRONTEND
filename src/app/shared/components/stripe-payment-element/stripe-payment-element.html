@@ -26,29 +26,62 @@
     <div class="grid gap-4 rounded-[1.4rem] border border-black/10 bg-surface-panel p-3 sm:p-4 md:p-5">
       <label class="block space-y-2">
         <span class="text-sm text-neutral-800">Numero de tarjeta</span>
-        <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-[15px] transition focus-within:border-black">
-          <div #cardNumberHost class="min-h-[22px]"></div>
-        </div>
+        @if (mode === 'demo') {
+          <input
+            type="text"
+            [value]="demoCardNumber()"
+            class="w-full rounded-[1.1rem] border border-black/10 bg-white px-4 py-4 text-base text-neutral-900 outline-none transition focus:border-black"
+            autocomplete="cc-number"
+            inputmode="numeric"
+            (input)="onDemoCardNumberInput($event)"
+          />
+        } @else {
+          <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-[15px] transition focus-within:border-black">
+            <div #cardNumberHost class="min-h-[22px]"></div>
+          </div>
+        }
       </label>
 
       <div class="grid gap-4 sm:grid-cols-2">
         <label class="block space-y-2">
           <span class="text-sm text-neutral-800">Fecha de caducidad</span>
-          <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-[15px] transition focus-within:border-black">
-            <div #cardExpiryHost class="min-h-[22px]"></div>
-          </div>
+          @if (mode === 'demo') {
+            <input
+              type="text"
+              [value]="demoExpiry()"
+              class="w-full rounded-[1.1rem] border border-black/10 bg-white px-4 py-4 text-base text-neutral-900 outline-none transition focus:border-black"
+              autocomplete="cc-exp"
+              inputmode="numeric"
+              (input)="onDemoExpiryInput($event)"
+            />
+          } @else {
+            <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-[15px] transition focus-within:border-black">
+              <div #cardExpiryHost class="min-h-[22px]"></div>
+            </div>
+          }
         </label>
 
         <label class="block space-y-2">
           <span class="text-sm text-neutral-800">Codigo de seguridad</span>
-          <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-[15px] transition focus-within:border-black">
-            <div #cardCvcHost class="min-h-[22px]"></div>
-          </div>
+          @if (mode === 'demo') {
+            <input
+              type="text"
+              [value]="demoCvc()"
+              class="w-full rounded-[1.1rem] border border-black/10 bg-white px-4 py-4 text-base text-neutral-900 outline-none transition focus:border-black"
+              autocomplete="cc-csc"
+              inputmode="numeric"
+              (input)="onDemoCvcInput($event)"
+            />
+          } @else {
+            <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-[15px] transition focus-within:border-black">
+              <div #cardCvcHost class="min-h-[22px]"></div>
+            </div>
+          }
         </label>
       </div>
     </div>
 
-    @if (loading()) {
+    @if (mode === 'stripe' && loading()) {
       <p class="text-sm text-neutral-500">Cargando formulario seguro...</p>
     }
 
