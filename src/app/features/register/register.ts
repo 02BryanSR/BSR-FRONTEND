@@ -7,11 +7,12 @@ import { finalize } from 'rxjs';
 import { RegisterRequest } from '../../core/interfaces/auth.interface';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { IconComponent } from '../../shared/components/icon/icon';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, IconComponent],
   templateUrl: './register.html',
 })
 export class Register {
@@ -21,6 +22,7 @@ export class Register {
   private readonly router = inject(Router);
 
   readonly isSubmitting = signal(false);
+  readonly showPassword = signal(false);
 
   readonly registerForm = this.fb.group({
     name: this.fb.control('', [Validators.required]),
@@ -28,6 +30,10 @@ export class Register {
     email: this.fb.control('', [Validators.required, Validators.email]),
     password: this.fb.control('', [Validators.required, Validators.minLength(6)]),
   });
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update((value) => !value);
+  }
 
   onSubmit(): void {
     if (this.isSubmitting()) {

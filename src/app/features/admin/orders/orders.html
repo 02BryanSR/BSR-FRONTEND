@@ -52,7 +52,17 @@
                   </span>
                 </div>
 
-                <p class="mt-3 text-sm font-medium text-neutral-900">{{ order.customerName }}</p>
+                @if (order.customerId !== null) {
+                  <a
+                    [routerLink]="['/admin/customers']"
+                    [queryParams]="{ customerId: order.customerId }"
+                    class="mt-3 inline-block text-sm font-medium text-neutral-900 transition hover:underline"
+                  >
+                    Cliente #{{ order.customerId }}
+                  </a>
+                } @else {
+                  <p class="mt-3 text-sm font-medium text-neutral-900">{{ order.customerName }}</p>
+                }
                 @if (order.customerEmail) {
                   <p class="mt-1 break-all text-sm text-neutral-600">{{ order.customerEmail }}</p>
                 } @else {

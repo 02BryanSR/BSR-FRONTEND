@@ -1,6 +1,6 @@
 <section class="space-y-6">
   <header
-    class="flex flex-col gap-4 rounded-[2rem] bg-shell-925 px-6 py-7 text-white shadow-[0_24px_70px_rgba(0,0,0,0.2)] md:flex-row md:items-end md:justify-between"
+    class="flex flex-col gap-4 rounded-4xl bg-shell-925 px-6 py-7 text-white shadow-[0_24px_70px_rgba(0,0,0,0.2)] md:flex-row md:items-end md:justify-between"
   >
     <div>
       <p class="text-[11px] uppercase tracking-[0.35em] text-white/55">Admin categorías</p>
@@ -8,8 +8,7 @@
         Categorías y subcategorías
       </h1>
       <p class="mt-3 max-w-2xl text-sm leading-7 text-white/70 md:text-base">
-        Gestiona las categorías y sus subcategorías desde este panel. Los productos se administran
-        aparte dentro de cada subcategoría.
+        Gestiona las categorías y sus subcategorías desde este panel. Los productos se administran dentro de cada subcategoría.
       </p>
     </div>
 
@@ -23,7 +22,7 @@
   </header>
 
   <section class="grid gap-6 lg:grid-cols-[minmax(0,1.18fr)_minmax(22rem,0.82fr)]">
-    <article class="rounded-[2rem] border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:p-6">
+    <article class="rounded-4xl border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:p-6">
       <div class="flex items-center justify-between gap-4">
         <div>
           <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Listado</p>
@@ -51,7 +50,7 @@
                   <img
                     [src]="group.category.imageUrl"
                     [alt]="group.category.name"
-                    class="aspect-[16/9] w-full object-cover"
+                    class="aspect-video w-full object-cover"
                   />
                 </figure>
               }
@@ -199,7 +198,7 @@
 
     <article
       #editorPanel
-      class="rounded-[2rem] border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:p-6 lg:sticky lg:top-4 lg:self-start lg:my-4 lg:h-[calc(100svh-2rem)] lg:overflow-y-auto"
+      class="rounded-4xl border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:p-6 lg:sticky lg:top-4 lg:self-start lg:my-4 lg:h-[calc(100svh-2rem)] lg:overflow-y-auto"
     >
       <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Formulario</p>
       <div class="mt-3 flex items-center justify-between gap-4">
@@ -261,11 +260,11 @@
         </label>
 
         @if (imagePreview()) {
-          <article class="overflow-hidden rounded-[1.5rem] border border-black/10 bg-surface-panel">
+          <article class="overflow-hidden rounded-3xl border border-black/10 bg-surface-panel">
             <img
               [src]="imagePreview()!"
               alt="Vista previa categoría"
-              class="aspect-[16/9] w-full object-cover"
+              class="aspect-video w-full object-cover"
             />
           </article>
 

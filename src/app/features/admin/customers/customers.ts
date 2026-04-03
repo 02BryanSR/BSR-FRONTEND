@@ -1,5 +1,7 @@
 import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AdminCustomer, AdminCustomerInput } from '../../../core/interfaces/admin.interface';
 import { AuthService } from '../../../core/services/auth.service';
@@ -16,6 +18,7 @@ export class AdminCustomers {
   private readonly authService = inject(AuthService);
   private readonly adminService = inject(AdminService);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
   private readonly toastService = inject(ToastService);
   @ViewChild('editorPanel') private editorPanel?: ElementRef<HTMLElement>;
 
@@ -23,6 +26,7 @@ export class AdminCustomers {
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly selectedCustomerId = signal<number | null>(null);
+  readonly requestedCustomerId = signal<number | null>(null);
   readonly isEditing = computed(() => this.selectedCustomerId() !== null);
   readonly currentUser = this.authService.currentUser;
 
@@ -38,6 +42,11 @@ export class AdminCustomers {
 
   constructor() {
     this.syncPasswordRules();
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      const customerId = Number(params.get('customerId'));
+      this.requestedCustomerId.set(Number.isInteger(customerId) && customerId > 0 ? customerId : null);
+      this.syncCustomerSelectionFromRoute();
+    });
     this.loadCustomers();
   }
 
@@ -50,6 +59,7 @@ export class AdminCustomers {
       .subscribe({
         next: (customers) => {
           this.customers.set(customers);
+          this.syncCustomerSelectionFromRoute();
         },
         error: () => {
           this.customers.set([]);
@@ -201,6 +211,20 @@ export class AdminCustomers {
 
     const parsedValue = Number(value.trim());
     return Number.isFinite(parsedValue) ? parsedValue : null;
+  }
+
+  private syncCustomerSelectionFromRoute(): void {
+    const requestedCustomerId = this.requestedCustomerId();
+
+    if (requestedCustomerId === null) {
+      return;
+    }
+
+    const customer = this.customers().find((currentCustomer) => currentCustomer.id === requestedCustomerId);
+
+    if (customer && this.selectedCustomerId() !== customer.id) {
+      this.startEdit(customer);
+    }
   }
 
   private scrollEditorIntoView(): void {
