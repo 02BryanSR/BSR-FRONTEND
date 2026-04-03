@@ -2,6 +2,7 @@
   interface Window {
     __APP_CONFIG__?: {
       apiBaseUrl?: string;
+      stripePublishableKey?: string;
     };
   }
 }
@@ -23,6 +24,7 @@ function resolveApiBaseUrl(): string {
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();
+export const STRIPE_PUBLISHABLE_KEY = window.__APP_CONFIG__?.stripePublishableKey?.trim() || '';
 
 export const API_ENDPOINTS = {
   auth: {
@@ -51,6 +53,8 @@ export const API_ENDPOINTS = {
     orders: `${API_BASE_URL}/api/orders/me`,
     order: (id: number | string) => `${API_BASE_URL}/api/orders/me/${id}`,
     orderDetails: (id: number | string) => `${API_BASE_URL}/api/orders/${id}/details`,
+    paymentIntent: `${API_BASE_URL}/api/payments/intent`,
+    confirmPayment: `${API_BASE_URL}/api/payments/confirm`,
   },
   admin: {
     products: `${API_BASE_URL}/api/products`,

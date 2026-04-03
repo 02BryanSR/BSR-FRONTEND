@@ -75,3 +75,19 @@ export interface CreateOrderInput {
   addressId: number;
   payMethod: string;
 }
+
+export interface CreatePaymentIntentInput {
+  addressId: number;
+  payMethod: string;
+}
+
+export interface CheckoutPaymentIntent {
+  clientSecret: string;
+  paymentIntentId: string | null;
+  amount: number | null;
+  currency: string;
+}
+
+export interface ConfirmPaymentInput {
+  paymentIntentId: string;
+}

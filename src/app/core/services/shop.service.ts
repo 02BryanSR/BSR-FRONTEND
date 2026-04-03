@@ -3,7 +3,10 @@ import { computed, Injectable, inject, signal } from '@angular/core';
 import { Observable, map, tap } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/api.constants';
 import {
+  CheckoutPaymentIntent,
+  ConfirmPaymentInput,
   CreateOrderInput,
+  CreatePaymentIntentInput,
   UserAddress,
   UserAddressInput,
   UserCart,
@@ -140,6 +143,19 @@ export class ShopService {
     );
   }
 
+  createPaymentIntent(payload: CreatePaymentIntentInput): Observable<CheckoutPaymentIntent> {
+    return this.http.post<unknown>(API_ENDPOINTS.shop.paymentIntent, payload).pipe(
+      map((response) => this.mapPaymentIntent(response)),
+    );
+  }
+
+  confirmPayment(payload: ConfirmPaymentInput): Observable<UserOrder> {
+    return this.http.post<unknown>(API_ENDPOINTS.shop.confirmPayment, payload).pipe(
+      map((response) => this.mapOrder(response)),
+      tap(() => this.resetCart()),
+    );
+  }
+
   private mapCart(input: unknown): UserCart {
     const source = this.asObject(input);
     const items = this.asArray(this.pick(source, ['items'])).map((item) => this.mapCartItem(item));
@@ -215,6 +231,20 @@ export class ShopService {
       productId: this.toNumber(this.pick(source, ['productId'])),
       orderId: this.toNumber(this.pick(source, ['orderId'])),
       subtotal: priceUnit === null ? null : priceUnit * quantity,
+    };
+  }
+
+  private mapPaymentIntent(input: unknown): CheckoutPaymentIntent {
+    const source = this.asObject(input);
+
+    return {
+      clientSecret:
+        this.toStringValue(this.pick(source, ['clientSecret', 'client_secret'])) || '',
+      paymentIntentId:
+        this.toStringValue(this.pick(source, ['paymentIntentId', 'payment_intent_id'])) || null,
+      amount: this.toNumber(this.pick(source, ['amount'])),
+      currency:
+        this.toStringValue(this.pick(source, ['currency']))?.toUpperCase() || 'EUR',
     };
   }
 
