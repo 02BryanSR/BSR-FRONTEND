@@ -299,10 +299,10 @@ export class Checkout {
       .subscribe({
         next: (order) => {
           this.toastService.show({
-            title: this.cardCheckoutMode === 'demo' && payload.payMethod === 'CARD' ? 'Pago simulado' : 'Pedido creado',
+            title: payload.payMethod === 'CARD' ? 'Pago realizado' : 'Pedido creado',
             message:
-              this.cardCheckoutMode === 'demo' && payload.payMethod === 'CARD'
-                ? `La simulacion fue correcta y tu pedido #${order.id} ya ha quedado registrado.`
+              payload.payMethod === 'CARD'
+                ? `El pago se ha realizado correctamente y tu pedido #${order.id} ya ha quedado registrado.`
                 : `Tu pedido #${order.id} ya ha quedado registrado.`,
           });
           void this.router.navigate(['/my-orders']);
