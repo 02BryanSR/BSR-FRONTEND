@@ -18,7 +18,7 @@ export class Cart {
 
   readonly cart = this.shopService.cart;
   readonly loading = signal(true);
-  readonly updatingProductId = signal<number | null>(null);
+  readonly updatingItemId = signal<number | null>(null);
   readonly clearing = signal(false);
   readonly hasItems = computed(() => this.cart().items.length > 0);
 
@@ -39,25 +39,25 @@ export class Cart {
       });
   }
 
-  decrease(productId: number, quantity: number): void {
+  decrease(itemId: number, quantity: number): void {
     if (quantity <= 1) {
-      this.remove(productId);
+      this.remove(itemId);
       return;
     }
 
-    this.updateQuantity(productId, quantity - 1);
+    this.updateQuantity(itemId, quantity - 1);
   }
 
-  increase(productId: number, quantity: number): void {
-    this.updateQuantity(productId, quantity + 1);
+  increase(itemId: number, quantity: number): void {
+    this.updateQuantity(itemId, quantity + 1);
   }
 
-  remove(productId: number): void {
-    this.updatingProductId.set(productId);
+  remove(itemId: number): void {
+    this.updatingItemId.set(itemId);
 
     this.shopService
-      .removeItem(productId)
-      .pipe(finalize(() => this.updatingProductId.set(null)))
+      .removeItem(itemId)
+      .pipe(finalize(() => this.updatingItemId.set(null)))
       .subscribe({
         next: () => {
           this.toastService.show({
@@ -100,12 +100,12 @@ export class Cart {
     void this.router.navigate(['/checkout']);
   }
 
-  private updateQuantity(productId: number, quantity: number): void {
-    this.updatingProductId.set(productId);
+  private updateQuantity(itemId: number, quantity: number): void {
+    this.updatingItemId.set(itemId);
 
     this.shopService
-      .updateItemQuantity(productId, quantity)
-      .pipe(finalize(() => this.updatingProductId.set(null)))
+      .updateItemQuantity(itemId, quantity)
+      .pipe(finalize(() => this.updatingItemId.set(null)))
       .subscribe({
         error: (error) => {
           this.toastService.showError(error.error?.message ?? 'No se pudo actualizar la cantidad.');

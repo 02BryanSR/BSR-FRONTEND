@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { computed, Injectable, inject, signal } from '@angular/core';
-import { Observable, map, tap } from 'rxjs';
+import { computed, effect, Injectable, inject, signal, untracked } from '@angular/core';
+import { EMPTY, Observable, catchError, finalize, map, tap } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/api.constants';
 import {
   CheckoutPaymentIntent,
@@ -15,9 +15,27 @@ import {
   UserOrderDetail,
   UserOrderStatus,
 } from '../interfaces/shop.interface';
+import { AuthService } from './auth.service';
 
 type JsonObject = Record<string, unknown>;
-const CART_SIZE_STORAGE_KEY = 'bsr.cart.itemSizes';
+type CartSyncReason =
+  | 'auth-restored'
+  | 'cart-updated'
+  | 'external-update'
+  | 'tab-focused'
+  | 'poll';
+
+interface CartSyncPayload {
+  eventId: string;
+  ownerKey: string;
+  reason: CartSyncReason;
+  sourceId: string;
+  timestamp: number;
+}
+
+const CART_SYNC_STORAGE_KEY = 'bsr.cart.sync';
+const CART_SYNC_CHANNEL_NAME = 'bsr.cart.sync';
+const CART_SYNC_POLL_INTERVAL_MS = 15000;
 
 const EMPTY_CART: UserCart = {
   cartId: null,
@@ -32,67 +50,82 @@ const EMPTY_CART: UserCart = {
 })
 export class ShopService {
   private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
   private readonly cartState = signal<UserCart>(EMPTY_CART);
-  private readonly cartItemSizes = signal<Record<number, string>>(this.loadStoredCartItemSizes());
+  private readonly syncSourceId = `cart-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  private readonly cartSyncChannel = this.createCartSyncChannel();
+  private cartRefreshInFlight = false;
 
   readonly cart = this.cartState.asReadonly();
   readonly cartItemCount = computed(() => this.cartState().totalProducts);
 
+  constructor() {
+    this.registerCartSessionEffect();
+    this.registerBrowserSync();
+  }
+
+  ensureInitialized(): void {}
+
   loadMyCart(): Observable<UserCart> {
     return this.http.get<unknown>(API_ENDPOINTS.shop.cart).pipe(
-      map((response) => this.applyStoredSelections(this.mapCart(response))),
+      map((response) => this.mapCart(response)),
       tap((cart) => this.cartState.set(cart)),
     );
   }
 
   addItem(productId: number, quantity = 1, size: string | null = null): Observable<UserCart> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('productId', productId)
       .set('quantity', quantity);
 
-    return this.http.post<unknown>(API_ENDPOINTS.shop.cartItems, null, { params }).pipe(
-      map((response) => {
-        if (size?.trim()) {
-          this.setStoredCartItemSize(productId, size);
-        }
+    const normalizedSize = size?.trim() || null;
 
-        return this.applyStoredSelections(this.mapCart(response));
+    if (normalizedSize) {
+      params = params.set('size', normalizedSize);
+    }
+
+    return this.http.post<unknown>(API_ENDPOINTS.shop.cartItems, null, { params }).pipe(
+      map((response) => this.mapCart(response)),
+      tap((cart) => {
+        this.cartState.set(cart);
+        this.broadcastCartChange('cart-updated');
       }),
-      tap((cart) => this.cartState.set(cart)),
     );
   }
 
-  updateItemQuantity(productId: number, quantity: number): Observable<UserCart> {
+  updateItemQuantity(itemId: number, quantity: number): Observable<UserCart> {
     const params = new HttpParams().set('quantity', quantity);
 
-    return this.http.put<unknown>(API_ENDPOINTS.shop.cartItem(productId), null, { params }).pipe(
-      map((response) => this.applyStoredSelections(this.mapCart(response))),
-      tap((cart) => this.cartState.set(cart)),
+    return this.http.put<unknown>(API_ENDPOINTS.shop.cartItem(itemId), null, { params }).pipe(
+      map((response) => this.mapCart(response)),
+      tap((cart) => {
+        this.cartState.set(cart);
+        this.broadcastCartChange('cart-updated');
+      }),
     );
   }
 
-  removeItem(productId: number): Observable<UserCart> {
-    return this.http.delete<unknown>(API_ENDPOINTS.shop.cartItem(productId)).pipe(
-      map((response) => {
-        this.setStoredCartItemSize(productId, null);
-        return this.applyStoredSelections(this.mapCart(response));
+  removeItem(itemId: number): Observable<UserCart> {
+    return this.http.delete<unknown>(API_ENDPOINTS.shop.cartItem(itemId)).pipe(
+      map((response) => this.mapCart(response)),
+      tap((cart) => {
+        this.cartState.set(cart);
+        this.broadcastCartChange('cart-updated');
       }),
-      tap((cart) => this.cartState.set(cart)),
     );
   }
 
   clearCart(): Observable<UserCart> {
     return this.http.delete<unknown>(API_ENDPOINTS.shop.cart).pipe(
-      map((response) => {
-        this.clearStoredCartItemSizes();
-        return this.applyStoredSelections(this.mapCart(response));
+      map((response) => this.mapCart(response)),
+      tap((cart) => {
+        this.cartState.set(cart);
+        this.broadcastCartChange('cart-updated');
       }),
-      tap((cart) => this.cartState.set(cart)),
     );
   }
 
   resetCart(): void {
-    this.clearStoredCartItemSizes();
     this.cartState.set(EMPTY_CART);
   }
 
@@ -139,7 +172,10 @@ export class ShopService {
   createMyOrder(payload: CreateOrderInput): Observable<UserOrder> {
     return this.http.post<unknown>(API_ENDPOINTS.shop.orders, payload).pipe(
       map((response) => this.mapOrder(response)),
-      tap(() => this.resetCart()),
+      tap(() => {
+        this.resetCart();
+        this.broadcastCartChange('cart-updated');
+      }),
     );
   }
 
@@ -152,8 +188,196 @@ export class ShopService {
   confirmPayment(payload: ConfirmPaymentInput): Observable<UserOrder> {
     return this.http.post<unknown>(API_ENDPOINTS.shop.confirmPayment, payload).pipe(
       map((response) => this.mapOrder(response)),
-      tap(() => this.resetCart()),
+      tap(() => {
+        this.resetCart();
+        this.broadcastCartChange('cart-updated');
+      }),
     );
+  }
+
+  private registerCartSessionEffect(): void {
+    effect(() => {
+      const isAuthenticated = this.authService.isAuthenticated();
+
+      untracked(() => {
+        if (isAuthenticated) {
+          this.refreshCartFromServer('auth-restored');
+          return;
+        }
+
+        this.cartState.set(EMPTY_CART);
+      });
+    });
+  }
+
+  private registerBrowserSync(): void {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+
+    window.addEventListener('storage', this.handleStorageEvent);
+    window.addEventListener('focus', this.handleWindowFocus);
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
+
+    window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        this.refreshCartFromServer('poll');
+      }
+    }, CART_SYNC_POLL_INTERVAL_MS);
+
+    this.cartSyncChannel?.addEventListener('message', this.handleCartSyncMessage);
+  }
+
+  private readonly handleStorageEvent = (event: StorageEvent): void => {
+    if (event.key !== CART_SYNC_STORAGE_KEY) {
+      return;
+    }
+
+    this.handleExternalCartSync(this.parseCartSyncPayload(event.newValue));
+  };
+
+  private readonly handleWindowFocus = (): void => {
+    this.refreshCartFromServer('tab-focused');
+  };
+
+  private readonly handleVisibilityChange = (): void => {
+    if (typeof document === 'undefined' || document.visibilityState !== 'visible') {
+      return;
+    }
+
+    this.refreshCartFromServer('tab-focused');
+  };
+
+  private readonly handleCartSyncMessage = (event: MessageEvent<CartSyncPayload>): void => {
+    this.handleExternalCartSync(event.data);
+  };
+
+  private refreshCartFromServer(reason: CartSyncReason): void {
+    if (!this.authService.isAuthenticated() || this.cartRefreshInFlight) {
+      return;
+    }
+
+    this.cartRefreshInFlight = true;
+
+    this.loadMyCart()
+      .pipe(
+        catchError(() => EMPTY),
+        finalize(() => {
+          this.cartRefreshInFlight = false;
+        }),
+      )
+      .subscribe();
+  }
+
+  private broadcastCartChange(reason: CartSyncReason): void {
+    const payload = this.buildCartSyncPayload(reason);
+
+    if (!payload) {
+      return;
+    }
+
+    try {
+      this.cartSyncChannel?.postMessage(payload);
+    } catch {
+      // Ignore broadcast channel failures and keep storage-based sync as fallback.
+    }
+
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    try {
+      localStorage.setItem(CART_SYNC_STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      // Ignore storage errors so cart mutations still complete.
+    }
+  }
+
+  private buildCartSyncPayload(reason: CartSyncReason): CartSyncPayload | null {
+    const ownerKey = this.getCartStorageOwnerKey();
+
+    if (!ownerKey) {
+      return null;
+    }
+
+    return {
+      eventId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      ownerKey,
+      reason,
+      sourceId: this.syncSourceId,
+      timestamp: Date.now(),
+    };
+  }
+
+  private handleExternalCartSync(payload: CartSyncPayload | null): void {
+    const ownerKey = this.getCartStorageOwnerKey();
+
+    if (!payload || !ownerKey || payload.ownerKey !== ownerKey || payload.sourceId === this.syncSourceId) {
+      return;
+    }
+
+    this.refreshCartFromServer('external-update');
+  }
+
+  private parseCartSyncPayload(rawValue: string | null): CartSyncPayload | null {
+    if (!rawValue) {
+      return null;
+    }
+
+    try {
+      const parsedValue = JSON.parse(rawValue) as Partial<CartSyncPayload>;
+
+      if (
+        typeof parsedValue.ownerKey !== 'string' ||
+        !parsedValue.ownerKey.trim() ||
+        typeof parsedValue.sourceId !== 'string' ||
+        !parsedValue.sourceId.trim()
+      ) {
+        return null;
+      }
+
+      const normalizedReason =
+        parsedValue.reason === 'auth-restored' ||
+        parsedValue.reason === 'cart-updated' ||
+        parsedValue.reason === 'external-update' ||
+        parsedValue.reason === 'tab-focused' ||
+        parsedValue.reason === 'poll'
+          ? parsedValue.reason
+          : 'cart-updated';
+
+      return {
+        eventId:
+          typeof parsedValue.eventId === 'string' && parsedValue.eventId.trim()
+            ? parsedValue.eventId
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        ownerKey: parsedValue.ownerKey.trim(),
+        reason: normalizedReason,
+        sourceId: parsedValue.sourceId.trim(),
+        timestamp:
+          typeof parsedValue.timestamp === 'number' && Number.isFinite(parsedValue.timestamp)
+            ? parsedValue.timestamp
+            : Date.now(),
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  private createCartSyncChannel(): BroadcastChannel | null {
+    if (typeof BroadcastChannel === 'undefined') {
+      return null;
+    }
+
+    try {
+      return new BroadcastChannel(CART_SYNC_CHANNEL_NAME);
+    } catch {
+      return null;
+    }
+  }
+
+  private getCartStorageOwnerKey(): string | null {
+    const email = this.authService.currentUser()?.email?.trim().toLowerCase() ?? '';
+    return email || null;
   }
 
   private mapCart(input: unknown): UserCart {
@@ -171,15 +395,13 @@ export class ShopService {
 
   private mapCartItem(input: unknown): UserCartItem {
     const source = this.asObject(input);
-    const productId = this.toNumber(this.pick(source, ['productId'])) ?? 0;
 
     return {
-      productId,
+      id: this.toNumber(this.pick(source, ['id', 'itemId'])) ?? 0,
+      productId: this.toNumber(this.pick(source, ['productId'])) ?? 0,
       productName: this.toStringValue(this.pick(source, ['productName'])) || 'Producto',
       size:
-        this.toStringValue(this.pick(source, ['size', 'talla', 'variant', 'variantName'])) ??
-        this.cartItemSizes()[productId] ??
-        null,
+        this.toStringValue(this.pick(source, ['size', 'talla', 'variant', 'variantName'])) ?? null,
       price: this.toNumber(this.pick(source, ['price'])),
       quantity: this.toNumber(this.pick(source, ['quantity'])) ?? 0,
       subtotal: this.toNumber(this.pick(source, ['subtotal'])),
@@ -230,6 +452,8 @@ export class ShopService {
       priceUnit,
       productId: this.toNumber(this.pick(source, ['productId'])),
       orderId: this.toNumber(this.pick(source, ['orderId'])),
+      size:
+        this.toStringValue(this.pick(source, ['size', 'talla', 'variant', 'variantName'])) ?? null,
       subtotal: priceUnit === null ? null : priceUnit * quantity,
     };
   }
@@ -309,83 +533,5 @@ export class ShopService {
     }
 
     return null;
-  }
-
-  private applyStoredSelections(cart: UserCart): UserCart {
-    return {
-      ...cart,
-      items: cart.items.map((item) => ({
-        ...item,
-        size: item.size ?? this.cartItemSizes()[item.productId] ?? null,
-      })),
-    };
-  }
-
-  private loadStoredCartItemSizes(): Record<number, string> {
-    if (typeof localStorage === 'undefined') {
-      return {};
-    }
-
-    try {
-      const rawValue = localStorage.getItem(CART_SIZE_STORAGE_KEY);
-
-      if (!rawValue) {
-        return {};
-      }
-
-      const parsedValue = JSON.parse(rawValue) as Record<string, unknown>;
-
-      return Object.entries(parsedValue).reduce<Record<number, string>>((accumulator, [key, value]) => {
-        const productId = Number(key);
-        const size = typeof value === 'string' ? value.trim() : '';
-
-        if (!Number.isFinite(productId) || !size) {
-          return accumulator;
-        }
-
-        accumulator[productId] = size;
-        return accumulator;
-      }, {});
-    } catch {
-      return {};
-    }
-  }
-
-  private setStoredCartItemSize(productId: number, size: string | null): void {
-    if (!Number.isFinite(productId) || productId <= 0) {
-      return;
-    }
-
-    const normalizedSize = size?.trim() || null;
-
-    this.cartItemSizes.update((currentSizes) => {
-      const nextSizes = { ...currentSizes };
-
-      if (normalizedSize) {
-        nextSizes[productId] = normalizedSize;
-      } else {
-        delete nextSizes[productId];
-      }
-
-      this.persistStoredCartItemSizes(nextSizes);
-      return nextSizes;
-    });
-  }
-
-  private clearStoredCartItemSizes(): void {
-    this.cartItemSizes.set({});
-    this.persistStoredCartItemSizes({});
-  }
-
-  private persistStoredCartItemSizes(sizes: Record<number, string>): void {
-    if (typeof localStorage === 'undefined') {
-      return;
-    }
-
-    try {
-      localStorage.setItem(CART_SIZE_STORAGE_KEY, JSON.stringify(sizes));
-    } catch {
-      // Ignore storage errors to keep the cart usable even if persistence fails.
-    }
   }
 }

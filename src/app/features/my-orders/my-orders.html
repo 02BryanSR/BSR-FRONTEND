@@ -134,6 +134,11 @@
                             <p class="mt-1 text-xs uppercase tracking-[0.2em] text-neutral-500">
                               Producto #{{ detail.productId }}
                             </p>
+                            @if (detail.size) {
+                              <p class="mt-2 text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                                Talla: {{ detail.size }}
+                              </p>
+                            }
                           </div>
 
                           <p class="text-sm text-neutral-600">x{{ detail.quantity }}</p>

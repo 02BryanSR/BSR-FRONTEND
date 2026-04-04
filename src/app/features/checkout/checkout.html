@@ -316,7 +316,7 @@
           </h2>
 
           <div class="mt-6 space-y-3">
-            @for (item of cart().items; track item.productId) {
+            @for (item of cart().items; track item.id) {
               <div class="grid gap-3 rounded-[1.3rem] border border-black/10 bg-surface-panel px-4 py-4 md:grid-cols-[1fr_auto_auto]">
                 <div>
                   <p class="font-medium text-neutral-900">{{ item.productName }}</p>

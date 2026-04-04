@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { HIDDEN_LAYOUT_ROUTES } from './core/constants/navigation.constants';
+import { ShopService } from './core/services/shop.service';
 import { Footer } from './layouts/components/footer/footer';
 import { Header } from './layouts/components/header/header';
 import { Sidebar } from './layouts/components/sidebar/sidebar';
@@ -15,6 +16,7 @@ import { ToastComponent } from './shared/components/toast/toast';
 })
 export class App {
   private readonly router = inject(Router);
+  private readonly shopService = inject(ShopService);
   protected readonly title = signal('bsr-frontend');
   private readonly hiddenHeaderRoutes = new Set<string>(HIDDEN_LAYOUT_ROUTES);
   readonly currentUrl = signal(this.router.url);
@@ -24,6 +26,8 @@ export class App {
   );
 
   constructor() {
+    this.shopService.ensureInitialized();
+
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));

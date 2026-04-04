@@ -4,8 +4,10 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class AuthStorageService {
-  private readonly tokenKey = 'vibood.auth.token';
-  private readonly userKey = 'vibood.auth.user';
+  private readonly tokenKey = 'bsr.auth.token';
+  private readonly userKey = 'bsr.auth.user';
+  private readonly legacyTokenKey = 'vibood.auth.token';
+  private readonly legacyUserKey = 'vibood.auth.user';
 
   private get storage(): Storage | null {
     if (typeof localStorage === 'undefined') {
@@ -16,7 +18,7 @@ export class AuthStorageService {
   }
 
   getToken(): string | null {
-    return this.read(this.tokenKey);
+    return this.readWithLegacyFallback(this.tokenKey, this.legacyTokenKey);
   }
 
   setToken(token: string): void {
@@ -28,7 +30,7 @@ export class AuthStorageService {
   }
 
   getUser<T>(): T | null {
-    const user = this.read(this.userKey);
+    const user = this.readWithLegacyFallback(this.userKey, this.legacyUserKey);
 
     if (!user) {
       return null;
@@ -55,12 +57,39 @@ export class AuthStorageService {
     this.removeUser();
   }
 
+  matchesStorageKey(key: string | null): boolean {
+    return (
+      key === this.tokenKey ||
+      key === this.userKey ||
+      key === this.legacyTokenKey ||
+      key === this.legacyUserKey
+    );
+  }
+
   private read(key: string): string | null {
     try {
       return this.storage?.getItem(key) ?? null;
     } catch {
       return null;
     }
+  }
+
+  private readWithLegacyFallback(primaryKey: string, legacyKey: string): string | null {
+    const primaryValue = this.read(primaryKey);
+
+    if (primaryValue !== null) {
+      return primaryValue;
+    }
+
+    const legacyValue = this.read(legacyKey);
+
+    if (legacyValue === null) {
+      return null;
+    }
+
+    this.write(primaryKey, legacyValue);
+    this.remove(legacyKey);
+    return legacyValue;
   }
 
   private write(key: string, value: string): void {

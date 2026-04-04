@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs';
@@ -71,17 +71,6 @@ export class Header {
         this.closeSearch();
         this.closeNavDropdown();
       });
-
-    effect(() => {
-      if (this.authService.isAuthenticated()) {
-        this.shopService.loadMyCart().subscribe({
-          error: () => this.shopService.resetCart(),
-        });
-        return;
-      }
-
-      this.shopService.resetCart();
-    });
   }
 
   @HostListener('document:keydown.escape')

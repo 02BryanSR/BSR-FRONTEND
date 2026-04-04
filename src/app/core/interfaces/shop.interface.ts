@@ -1,6 +1,7 @@
 export type UserOrderStatus = 'CREATED' | 'SENT' | 'DELIVERED';
 
 export interface UserCartItem {
+  id: number;
   productId: number;
   productName: string;
   size: string | null;
@@ -56,6 +57,7 @@ export interface UserOrderDetail {
   priceUnit: number | null;
   productId: number | null;
   orderId: number | null;
+  size: string | null;
   subtotal: number | null;
 }
 

@@ -52,7 +52,7 @@
           </div>
 
           <div class="mt-6 space-y-4">
-            @for (item of cart().items; track item.productId) {
+            @for (item of cart().items; track item.id) {
               <article class="rounded-[1.6rem] border border-black/10 bg-surface-panel p-5">
                 <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div class="min-w-0">
@@ -76,7 +76,7 @@
                     <div class="inline-flex items-center rounded-full border border-black/10 bg-white px-2 py-2">
                       <button
                         type="button"
-                        (click)="decrease(item.productId, item.quantity)"
+                        (click)="decrease(item.id, item.quantity)"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-full text-lg text-neutral-900 transition hover:bg-neutral-100"
                       >
                         -
@@ -86,7 +86,7 @@
                       </span>
                       <button
                         type="button"
-                        (click)="increase(item.productId, item.quantity)"
+                        (click)="increase(item.id, item.quantity)"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-full text-lg text-neutral-900 transition hover:bg-neutral-100"
                       >
                         +
@@ -99,11 +99,11 @@
 
                     <button
                       type="button"
-                      (click)="remove(item.productId)"
-                      [disabled]="updatingProductId() === item.productId"
+                      (click)="remove(item.id)"
+                      [disabled]="updatingItemId() === item.id"
                       class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {{ updatingProductId() === item.productId ? 'Actualizando...' : 'Quitar' }}
+                      {{ updatingItemId() === item.id ? 'Actualizando...' : 'Quitar' }}
                     </button>
                   </div>
                 </div>

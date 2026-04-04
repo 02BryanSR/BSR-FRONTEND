@@ -48,6 +48,7 @@ export class AuthService {
 
   constructor() {
     this.restoreSession();
+    this.registerStorageSync();
   }
 
   login(credentials: LoginRequest): Observable<User> {
@@ -140,6 +141,20 @@ export class AuthService {
     });
   }
 
+  private registerStorageSync(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.addEventListener('storage', (event) => {
+      if (!this.authStorage.matchesStorageKey(event.key)) {
+        return;
+      }
+
+      this.syncSessionFromStorage();
+    });
+  }
+
   private setSession(token: string, user: User): void {
     this.authStorage.setToken(token);
     this.authStorage.setUser(user);
@@ -192,6 +207,35 @@ export class AuthService {
     return this.http.get<UserInfoResponse>(API_ENDPOINTS.auth.me).pipe(
       map((response) => this.mapUserInfoResponse(response)),
     );
+  }
+
+  private syncSessionFromStorage(): void {
+    const token = this.authStorage.getToken();
+    const user = this.authStorage.getUser<User>();
+
+    if (!token || this.isTokenExpired(token)) {
+      this.tokenState.set(null);
+      this.currentUserState.set(null);
+      return;
+    }
+
+    this.tokenState.set(token);
+
+    if (user) {
+      this.currentUserState.set(user);
+      return;
+    }
+
+    this.fetchCurrentUser().subscribe({
+      next: (currentUser) => {
+        this.authStorage.setUser(currentUser);
+        this.currentUserState.set(currentUser);
+      },
+      error: () => {
+        this.tokenState.set(null);
+        this.currentUserState.set(null);
+      },
+    });
   }
 
   private mapUserInfoResponse(response: UserInfoResponse): User {
