@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { HIDDEN_LAYOUT_ROUTES } from './core/constants/navigation.constants';
+import { Footer } from './layouts/components/footer/footer';
 import { Header } from './layouts/components/header/header';
 import { Sidebar } from './layouts/components/sidebar/sidebar';
 import { ToastComponent } from './shared/components/toast/toast';
@@ -9,7 +10,7 @@ import { ToastComponent } from './shared/components/toast/toast';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [Header, RouterOutlet, Sidebar, ToastComponent],
+  imports: [Footer, Header, RouterOutlet, Sidebar, ToastComponent],
   templateUrl: './app.html',
 })
 export class App {

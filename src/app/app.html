@@ -7,5 +7,10 @@
   }
 
   <router-outlet />
+
+  @if (showHeader()) {
+    <app-footer />
+  }
+
   <app-toast />
 </main>
