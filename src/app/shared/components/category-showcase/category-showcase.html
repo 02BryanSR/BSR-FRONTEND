@@ -1,10 +1,10 @@
 <section class="w-full px-6 pb-16 pt-28 md:px-10 lg:px-12.5">
   <div class="mx-auto max-w-7xl space-y-8">
     <article
-      class="overflow-hidden rounded-[2rem] bg-shell-975 text-white shadow-[0_30px_90px_rgba(0,0,0,0.35)]"
+      class="overflow-hidden rounded-4xl bg-shell-975 text-white shadow-[0_30px_90px_rgba(0,0,0,0.35)]"
     >
       <div class="grid lg:grid-cols-[1.15fr_0.85fr]">
-        <figure class="relative min-h-[42rem] overflow-hidden md:min-h-[54rem]">
+        <figure class="relative min-h-168 overflow-hidden md:min-h-216">
           <img
             [src]="heroImage()"
             [alt]="heroAlt()"
@@ -34,7 +34,7 @@
 
             <div class="mt-6 grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
               @for (highlight of highlights(); track highlight) {
-                <article class="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
+                <article class="rounded-3xl border border-white/10 bg-white/5 p-5">
                   <p class="text-xs uppercase tracking-[0.22em] text-white/45">Clave</p>
                   <p class="mt-3 text-sm font-medium uppercase tracking-[0.15em] text-white">
                     {{ highlight }}
@@ -70,7 +70,7 @@
           <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">
             {{ panel.eyebrow }}
           </p>
-          <h2 class="mt-4 text-2xl font-semibold uppercase tracking-[0.1em]">
+          <h2 class="mt-4 text-2xl font-semibold uppercase tracking-widest">
             {{ panel.title }}
           </h2>
           <p class="mt-4 text-sm leading-7 text-neutral-600">
@@ -86,7 +86,7 @@
           <img
             [src]="image.src"
             [alt]="image.alt"
-            class="h-[22rem] w-full object-cover transition duration-500 group-hover:scale-105"
+            class="h-88 w-full object-cover transition duration-500 group-hover:scale-105"
           />
           <div
             aria-hidden="true"

@@ -44,7 +44,7 @@
   ></button>
 
   <aside
-    class="fixed inset-y-0 left-0 z-80 flex w-[min(88vw,24rem)] flex-col bg-shell-960 px-6 py-6 text-[var(--color-danger-600)] shadow-2xl lg:hidden"
+    class="fixed inset-y-0 left-0 z-80 flex w-[min(88vw,24rem)] flex-col bg-shell-960 px-6 py-6 text-danger-600 shadow-2xl lg:hidden"
   >
     <header class="flex items-center justify-between">
       <p class="text-sm font-bold uppercase tracking-[0.25em]">BOLD STYLE REVOLUTION</p>
@@ -52,7 +52,7 @@
       <button
         type="button"
         aria-label="Cerrar menu"
-        class="inline-flex items-center justify-center text-[var(--color-danger-600)]"
+        class="inline-flex items-center justify-center text-danger-600"
         (click)="close()"
       >
         <app-icon name="icon-close" class="h-6 w-6"></app-icon>
@@ -66,7 +66,7 @@
             @if (hasSubcategoryMenu(link)) {
               <button
                 type="button"
-                class="flex w-full items-center justify-between border-b border-transparent pb-2 text-left text-[var(--color-danger-600)] transition hover:border-[var(--color-danger-600)] hover:text-[var(--color-danger-600)]"
+                class="flex w-full items-center justify-between border-b border-transparent pb-2 text-left text-danger-600 transition hover:border-danger-600 hover:text-danger-600"
                 (click)="toggleSubcategories(link.route)"
               >
                 <span>{{ link.label }}</span>
@@ -84,7 +84,7 @@
                     <a
                       [routerLink]="link.route"
                       [queryParams]="getSubcategoryQueryParams(subcategory.slug)"
-                      class="text-[var(--color-danger-600)] transition hover:text-[var(--color-danger-600)]"
+                      class="text-danger-600 transition hover:text-danger-600"
                       (click)="close()"
                     >
                       {{ subcategory.label }}
@@ -96,7 +96,7 @@
               <a
                 [routerLink]="link.route"
                 routerLinkActive="border-[var(--color-danger-600)] text-[var(--color-danger-600)]"
-                class="border-b border-transparent pb-2 text-[var(--color-danger-600)] transition hover:border-[var(--color-danger-600)] hover:text-[var(--color-danger-600)]"
+                class="border-b border-transparent pb-2 text-danger-600 transition hover:border-danger-600 hover:text-danger-600"
                 (click)="close()"
               >
                 {{ link.label }}
@@ -108,22 +108,22 @@
     </nav>
 
     <footer class="mt-auto border-t border-white/15 pt-6">
-      <p class="mb-4 text-xs uppercase tracking-[0.25em] text-[var(--color-danger-600)]">Acciones</p>
+      <p class="mb-4 text-xs uppercase tracking-[0.25em] text-danger-600">Acciones</p>
       @if (authService.isAdmin()) {
         <a
           routerLink="/admin/dashboard"
-          class="mb-4 inline-flex w-full items-center justify-center rounded-full border border-[var(--color-danger-600)] px-4 py-3 text-xs uppercase tracking-[0.22em] text-[var(--color-danger-600)] transition hover:bg-[color-mix(in_srgb,var(--color-danger-600)_10%,transparent)]"
+          class="mb-4 inline-flex w-full items-center justify-center rounded-full border border-danger-600 px-4 py-3 text-xs uppercase tracking-[0.22em] text-danger-600 transition hover:bg-[color-mix(in_srgb,var(--color-danger-600)_10%,transparent)]"
           (click)="close()"
         >
           Ver dashboard
         </a>
       }
 
-      <div class="flex items-center gap-5 text-[var(--color-danger-600)]">
+      <div class="flex items-center gap-5 text-danger-600">
         <button
           type="button"
           aria-label="Buscar"
-          class="inline-flex items-center justify-center text-[var(--color-danger-600)]"
+          class="inline-flex items-center justify-center text-danger-600"
         >
           <app-icon name="icon-search" class="h-5 w-5"></app-icon>
         </button>
@@ -131,7 +131,7 @@
         <a
           routerLink="/cart"
           aria-label="Abrir compras o favoritos"
-          class="relative inline-flex items-center justify-center text-[var(--color-danger-600)]"
+          class="relative inline-flex items-center justify-center text-danger-600"
           (click)="close()"
         >
           <app-icon name="icon-bag" class="h-5 w-5"></app-icon>

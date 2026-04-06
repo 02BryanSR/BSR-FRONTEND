@@ -9,7 +9,7 @@
         @for (brand of brands; track brand.key) {
           <button
             type="button"
-            class="min-w-[96px] rounded-full border px-3 py-2 text-center transition sm:min-w-0"
+            class="min-w-24 rounded-full border px-3 py-2 text-center transition sm:min-w-0"
             [ngClass]="
               selectedBrand() === brand.key
                 ? 'border-black bg-black text-white'
@@ -36,8 +36,8 @@
             (input)="onDemoCardNumberInput($event)"
           />
         } @else {
-          <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-[15px] transition focus-within:border-black">
-            <div #cardNumberHost class="min-h-[22px]"></div>
+          <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-3.75 transition focus-within:border-black">
+            <div #cardNumberHost class="min-h-5.5"></div>
           </div>
         }
       </label>
@@ -55,8 +55,8 @@
               (input)="onDemoExpiryInput($event)"
             />
           } @else {
-            <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-[15px] transition focus-within:border-black">
-              <div #cardExpiryHost class="min-h-[22px]"></div>
+            <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-3.75 transition focus-within:border-black">
+              <div #cardExpiryHost class="min-h-5.5"></div>
             </div>
           }
         </label>
@@ -73,8 +73,8 @@
               (input)="onDemoCvcInput($event)"
             />
           } @else {
-            <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-[15px] transition focus-within:border-black">
-              <div #cardCvcHost class="min-h-[22px]"></div>
+            <div class="rounded-[1.1rem] border border-black/10 bg-white px-4 py-3.75 transition focus-within:border-black">
+              <div #cardCvcHost class="min-h-5.5"></div>
             </div>
           }
         </label>

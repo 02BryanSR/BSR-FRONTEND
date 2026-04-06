@@ -1,5 +1,5 @@
 <section class="w-full bg-white px-4 pb-16 pt-24 text-neutral-900 md:px-8 xl:px-10">
-  <div class="mx-auto max-w-[1920px] space-y-8">
+  <div class="mx-auto max-w-480 space-y-8">
     @if (loading()) {
       <app-surface-card
         tone="panel"
@@ -17,10 +17,10 @@
               <img
                 [src]="product.imageUrl"
                 [alt]="product.name"
-                class="aspect-[4/5] w-full object-cover"
+                class="aspect-4/5 w-full object-cover"
               />
             } @else {
-              <div class="flex aspect-[4/5] items-center justify-center text-xs uppercase tracking-[0.28em] text-black/45">
+              <div class="flex aspect-4/5 items-center justify-center text-xs uppercase tracking-[0.28em] text-black/45">
                 Sin imagen
               </div>
             }

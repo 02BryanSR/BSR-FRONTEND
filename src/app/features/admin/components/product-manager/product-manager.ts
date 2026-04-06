@@ -304,7 +304,19 @@ export class AdminProductManager implements OnDestroy {
     return product.categoryName?.trim() || 'Sin categoría';
   }
 
-  availableSubcategories(categoryId?: number | null): readonly AdminSubcategory[] {
+  get availableSubcategories(): readonly AdminSubcategory[] {
+    return this.resolveAvailableSubcategories(
+      this.normalizeCategoryId(this.fixedCategoryId() ?? this.form.controls.categoryId.value),
+    );
+  }
+
+  get showSubcategoryField(): boolean {
+    return this.availableSubcategories.length > 0;
+  }
+
+  private resolveAvailableSubcategories(
+    categoryId?: number | null,
+  ): readonly AdminSubcategory[] {
     const resolvedCategoryId =
       categoryId === undefined
         ? this.normalizeCategoryId(this.fixedCategoryId() ?? this.form.controls.categoryId.value)
@@ -319,10 +331,6 @@ export class AdminProductManager implements OnDestroy {
       this.categories(),
       this.products(),
     );
-  }
-
-  showSubcategoryField(): boolean {
-    return this.availableSubcategories().length > 0;
   }
 
   displayPrice(price: number | null): string {
@@ -715,7 +723,7 @@ export class AdminProductManager implements OnDestroy {
 
   private ensureValidSubcategorySelection(): void {
     const categoryId = this.normalizeCategoryId(this.fixedCategoryId() ?? this.form.controls.categoryId.value);
-    const availableSubcategories = this.availableSubcategories(categoryId);
+    const availableSubcategories = this.resolveAvailableSubcategories(categoryId);
     const availableSlugs = new Set(availableSubcategories.map((subcategory) => subcategory.slug));
     const currentSlug = this.normalizeSubcategorySlug(this.form.controls.subcategorySlug.value);
     const fixedSlug = this.normalizeSubcategorySlug(this.fixedSubcategory());
@@ -764,26 +772,36 @@ export class AdminProductManager implements OnDestroy {
 
     if (
       selectedSlug &&
-      this.availableSubcategories(categoryId).some((subcategory) => subcategory.slug === selectedSlug)
+      this.resolveAvailableSubcategories(categoryId).some(
+        (subcategory) => subcategory.slug === selectedSlug,
+      )
     ) {
       return selectedSlug;
     }
 
     if (
       fixedSubcategory &&
-      this.availableSubcategories(categoryId).some((subcategory) => subcategory.slug === fixedSubcategory)
+      this.resolveAvailableSubcategories(categoryId).some(
+        (subcategory) => subcategory.slug === fixedSubcategory,
+      )
     ) {
       return fixedSubcategory;
     }
 
     if (
       storedSlug &&
-      this.availableSubcategories(categoryId).some((subcategory) => subcategory.slug === storedSlug)
+      this.resolveAvailableSubcategories(categoryId).some(
+        (subcategory) => subcategory.slug === storedSlug,
+      )
     ) {
       return storedSlug;
     }
 
-    return this.resolveDefaultSubcategorySlug(categoryId) ?? this.availableSubcategories(categoryId)[0]?.slug ?? null;
+    return (
+      this.resolveDefaultSubcategorySlug(categoryId) ??
+      this.resolveAvailableSubcategories(categoryId)[0]?.slug ??
+      null
+    );
   }
 
   private resolveDefaultSubcategorySlug(categoryId: number | null): string | null {
@@ -798,7 +816,7 @@ export class AdminProductManager implements OnDestroy {
     categoryId: number | null,
     productLike: Pick<AdminProduct, 'name' | 'description' | 'sku'>,
   ): string | null {
-    const availableSubcategories = this.availableSubcategories(categoryId);
+    const availableSubcategories = this.resolveAvailableSubcategories(categoryId);
     const fixedSubcategory = this.normalizeSubcategorySlug(this.fixedSubcategory());
 
     if (!availableSubcategories.length) {
