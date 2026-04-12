@@ -76,7 +76,7 @@ export class AddressAutocompleteComponent implements OnChanges, OnDestroy {
 
     if (!this.lookupConfigured) {
       this.feedbackMessage.set(
-        'Anade tu API key de Geoapify en public/app-config.js para activar las sugerencias de direccion.',
+        'Anade tu API key de Geoapify en src/environments/environment.ts para activar las sugerencias de direccion.',
       );
       this.suggestions.set([]);
       this.open.set(false);

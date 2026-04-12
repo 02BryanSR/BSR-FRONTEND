@@ -18,8 +18,15 @@ const CATEGORY_ALIASES: Record<CategorySlug, readonly string[]> = {
   men: ['men', 'man', 'hombre', 'hombres'],
   boys: ['boys', 'boy', 'nino', 'ninos'],
   girls: ['girls', 'girl', 'nina', 'ninas'],
-  kids: ['kids', 'kid', 'children', 'child', 'infantil'],
   accessories: ['accessories', 'accessory', 'accesorio', 'accesorios', 'complemento', 'complementos'],
+};
+
+const CATEGORY_LABELS: Record<CategorySlug, string> = {
+  women: 'Mujer',
+  men: 'Hombre',
+  boys: 'Niños',
+  girls: 'Niñas',
+  accessories: 'Accesorios',
 };
 
 @Injectable({
@@ -58,10 +65,8 @@ export class CatalogService {
     return this.categoriesRequest$;
   }
 
-  getCategoryBySlug(slug: CategorySlug): Observable<CatalogCategory | null> {
-    return this.categoriesRequest$.pipe(
-      map((categories) => categories.find((category) => category.slug === slug) ?? null),
-    );
+  getCategoryBySlug(slug: CategorySlug): Observable<CatalogCategory> {
+    return this.categoriesRequest$.pipe(map((categories) => categories.find((category) => category.slug === slug)!));
   }
 
   getProductsByCategoryId(categoryId: number): Observable<readonly CatalogProduct[]> {
@@ -97,13 +102,11 @@ export class CatalogService {
   getNavigationLinks(): Observable<readonly NavigationLink[]> {
     return this.categoriesRequest$.pipe(
       map((categories) => {
-        const dynamicLinks = categories
-          .filter((category) => !!category.route)
-          .map((category) => ({
-            label: category.name.trim().toUpperCase(),
-            route: category.route!,
-            categorySlug: category.slug,
-          }));
+        const dynamicLinks = categories.map((category) => ({
+          label: category.name.trim().toUpperCase(),
+          route: category.route,
+          categorySlug: category.slug,
+        }));
 
         if (!dynamicLinks.length) {
           return PRIMARY_NAV_LINKS;
@@ -117,31 +120,29 @@ export class CatalogService {
 
   private mapCategory(category: CategoryApiResponse): CatalogCategory {
     const slug = this.resolveCategorySlug(category.name);
-    const normalizedName = this.normalizeCategoryName(category.name, slug);
-    const route = this.resolveCategoryRoute(slug);
 
     return {
       id: category.id,
-      name: normalizedName || 'Categoría',
-      description: category.description?.trim() || '',
-      imageUrl: this.resolveBackendAssetUrl(category.imageUrl ?? null),
-      productIds: category.productIds ?? [],
+      name: this.normalizeCategoryName(slug),
+      description: category.description.trim(),
+      imageUrl: this.resolveBackendAssetUrl(category.imageUrl),
+      productIds: category.productIds,
       slug,
-      route,
+      route: this.resolveCategoryRoute(slug),
     };
   }
 
   private mapProduct(product: ProductApiResponse): CatalogProduct {
     return {
       id: product.id,
-      name: product.name?.trim() || 'Producto',
-      sku: product.sku?.trim() || null,
-      description: product.description?.trim() || '',
-      price: typeof product.price === 'number' ? product.price : null,
-      stock: typeof product.stock === 'number' ? product.stock : null,
+      name: product.name.trim(),
+      sku: product.sku.trim(),
+      description: product.description.trim(),
+      price: product.price,
+      stock: product.stock,
       categoryId: product.categoryId,
       imageUrl: this.resolveBackendAssetUrl(
-        product.imageUrl ?? product.image ?? product.imagePath ?? product.thumbnailUrl ?? null,
+        product.imageUrl ?? product.image ?? product.imagePath ?? product.thumbnailUrl,
       ),
     };
   }
@@ -168,9 +169,7 @@ export class CatalogService {
   }
 
   private buildCategorySearchEntries(categories: readonly CatalogCategory[]): CatalogSearchItem[] {
-    return categories
-      .filter((category) => !!category.route)
-      .map((category) => this.createCategorySearchEntry(category));
+    return categories.map((category) => this.createCategorySearchEntry(category));
   }
 
   private createCategorySearchEntry(category: CatalogCategory): CatalogSearchItem {
@@ -178,51 +177,42 @@ export class CatalogService {
       type: 'category',
       id: category.id,
       title: category.name,
-      subtitle: category.description || 'Explorar categoría',
-      route: category.route ?? '/home',
+      subtitle: category.description || 'Explorar categor\u00EDa',
+      route: category.route,
       imageUrl: category.imageUrl,
       keywords: this.buildKeywords(
         category.name,
         category.description,
         category.slug,
         category.route,
-        ...(category.slug ? CATEGORY_ALIASES[category.slug] : []),
+        ...CATEGORY_ALIASES[category.slug],
       ),
     };
   }
 
-  private createProductSearchEntry(
-    product: CatalogProduct,
-    category: CatalogCategory | null | undefined,
-  ): CatalogSearchItem {
+  private createProductSearchEntry(product: CatalogProduct, category: CatalogCategory): CatalogSearchItem {
     return {
       type: 'product',
       id: product.id,
       title: product.name,
-      subtitle: category?.name ?? product.sku ?? 'Producto',
+      subtitle: category.name,
       route: `/products/${product.id}`,
       imageUrl: product.imageUrl,
       keywords: this.buildKeywords(
         product.name,
         product.description,
         product.sku,
-        category?.name,
-        category?.slug,
-        ...(category?.slug ? CATEGORY_ALIASES[category.slug] : []),
+        category.name,
+        category.slug,
+        ...CATEGORY_ALIASES[category.slug],
       ),
     };
   }
 
-  private buildKeywords(...values: (string | null | undefined)[]): readonly string[] {
+  private buildKeywords(...values: readonly string[]): readonly string[] {
     const keywords = new Set<string>();
 
-    values.forEach((value) => {
-      const normalizedValue = this.normalizeText(value);
-
-      if (!normalizedValue) {
-        return;
-      }
-
+    values.map((value) => this.normalizeText(value)).filter(Boolean).forEach((normalizedValue) => {
       keywords.add(normalizedValue);
 
       normalizedValue
@@ -235,30 +225,13 @@ export class CatalogService {
     return [...keywords];
   }
 
-  private resolveCategorySlug(categoryName: string | null | undefined): CategorySlug | null {
+  private resolveCategorySlug(categoryName: string): CategorySlug {
     const normalizedName = this.normalizeText(categoryName);
-
-    if (!normalizedName) {
-      return null;
-    }
-
-    for (const [slug, aliases] of Object.entries(CATEGORY_ALIASES) as [
-      CategorySlug,
-      readonly string[],
-    ][]) {
-      if (aliases.some((alias) => normalizedName === alias || normalizedName.includes(alias))) {
-        return slug;
-      }
-    }
-
-    return null;
+    return (Object.entries(CATEGORY_ALIASES) as [CategorySlug, readonly string[]][])
+      .find(([, aliases]) => aliases.some((alias) => normalizedName === alias || normalizedName.includes(alias)))![0];
   }
 
-  private normalizeText(value: string | null | undefined): string {
-    if (!value) {
-      return '';
-    }
-
+  private normalizeText(value: string): string {
     return value
       .trim()
       .toLowerCase()
@@ -266,47 +239,15 @@ export class CatalogService {
       .replace(/[\u0300-\u036f]/g, '');
   }
 
-  private normalizeCategoryName(
-    value: string | null | undefined,
-    slug: CategorySlug | null,
-  ): string {
-    const normalizedValue = value?.trim() || '';
-
-    if (slug === 'boys') {
-      return 'Ni\u00F1os';
-    }
-
-    if (slug === 'girls') {
-      return 'Ni\u00F1as';
-    }
-
-    if (slug === 'accessories') {
-      return 'Accesorios';
-    }
-
-    return normalizedValue;
+  private normalizeCategoryName(slug: CategorySlug): string {
+    return CATEGORY_LABELS[slug];
   }
 
-  private resolveCategoryRoute(slug: CategorySlug | null): string | null {
-    switch (slug) {
-      case 'women':
-        return '/women';
-      case 'men':
-        return '/men';
-      case 'boys':
-        return '/ninos';
-      case 'girls':
-        return '/ninas';
-      case 'kids':
-        return '/kids';
-      case 'accessories':
-        return '/accessories';
-      default:
-        return null;
-    }
+  private resolveCategoryRoute(slug: CategorySlug): string {
+    return `/${slug}`;
   }
 
-  private resolveBackendAssetUrl(assetPath: string | null): string | null {
+  private resolveBackendAssetUrl(assetPath: string | null | undefined): string | null {
     const normalizedPath = assetPath?.trim();
 
     if (!normalizedPath) {

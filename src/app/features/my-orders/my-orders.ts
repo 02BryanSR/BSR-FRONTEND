@@ -30,6 +30,7 @@ export class MyOrders {
   readonly loading = signal(true);
   readonly loadingDetailsOrderId = signal<number | null>(null);
   readonly expandedOrderId = signal<number | null>(null);
+  readonly invoiceAction = signal<{ orderId: number; mode: 'preview' | 'download' } | null>(null);
   readonly createdCount = computed(
     () => this.orders().filter((order) => order.status === 'CREATED').length,
   );
@@ -119,6 +120,21 @@ export class MyOrders {
     return this.detailsByOrder()[orderId] ?? [];
   }
 
+  previewInvoice(order: UserOrder): void {
+    const previewWindow =
+      typeof window === 'undefined' ? null : window.open('', '_blank', 'noopener,noreferrer');
+
+    this.openInvoice(order, 'preview', previewWindow);
+  }
+
+  downloadInvoice(order: UserOrder): void {
+    this.openInvoice(order, 'download');
+  }
+
+  isInvoiceBusy(orderId: number): boolean {
+    return this.invoiceAction()?.orderId === orderId;
+  }
+
   getAddressLabel(addressId: number | null): string {
     if (addressId === null) {
       return 'Dirección sin asignar';
@@ -159,5 +175,50 @@ export class MyOrders {
         imageUrl: product?.imageUrl ?? null,
       };
     });
+  }
+
+  private openInvoice(
+    order: UserOrder,
+    mode: 'preview' | 'download',
+    previewWindow: Window | null = null,
+  ): void {
+    this.invoiceAction.set({ orderId: order.id, mode });
+
+    this.shopService
+      .getMyOrderInvoice(order.id, mode === 'download')
+      .pipe(finalize(() => this.invoiceAction.set(null)))
+      .subscribe({
+        next: ({ blob, fileName }) => {
+          const objectUrl = URL.createObjectURL(blob);
+
+          if (mode === 'preview') {
+            if (previewWindow) {
+              previewWindow.location.href = objectUrl;
+            } else if (typeof window !== 'undefined') {
+              window.open(objectUrl, '_blank', 'noopener,noreferrer');
+            }
+          } else {
+            this.downloadBlob(objectUrl, fileName);
+          }
+
+          globalThis.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+        },
+        error: (error) => {
+          previewWindow?.close();
+          this.toastService.showError(error.error?.message ?? 'No se pudo abrir la factura PDF.');
+        },
+      });
+  }
+
+  private downloadBlob(objectUrl: string, fileName: string): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const anchor = document.createElement('a');
+    anchor.href = objectUrl;
+    anchor.download = fileName;
+    anchor.rel = 'noopener';
+    anchor.click();
   }
 }

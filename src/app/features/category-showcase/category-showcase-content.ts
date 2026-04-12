@@ -217,54 +217,6 @@ const FALLBACK_CATEGORY_CONTENT: Record<CategorySlug, CategoryShowcaseContent> =
     ],
     products: [],
   },
-  kids: {
-    eyebrow: 'Collection',
-    title: 'Kids',
-    description:
-      'A kids category ready for playful color, easy outfits and an energetic layout that still feels aligned with the main brand.',
-    accent: 'Daily energy',
-    heroImage: '/images/home-4-3.jpg',
-    heroAlt: 'Kids category hero',
-    highlights: ['Easy sets', 'Active color', 'Daily movement'],
-    panels: [
-      {
-        eyebrow: 'Edit',
-        title: 'Play all day',
-        description:
-          'A fresh structure for colorful looks, comfortable fits and a more energetic browsing experience across the category.',
-      },
-      {
-        eyebrow: 'Capsule',
-        title: 'Mini icons',
-        description:
-          'Ideal for hero pieces, new drops and styled combinations that make the kids section feel playful and modern.',
-      },
-      {
-        eyebrow: 'Focus',
-        title: 'Ready to move',
-        description:
-          'Prepared for future catalog cards, promo banners and a complete kids shopping flow with a stronger visual identity.',
-      },
-    ],
-    gallery: [
-      {
-        src: '/images/home-4-2.jpg',
-        alt: 'Kids collection movement look',
-        caption: 'Movement first',
-      },
-      {
-        src: '/images/home-4-3.jpg',
-        alt: 'Kids collection colorful look',
-        caption: 'Color layers',
-      },
-      {
-        src: '/images/home-4-4.jpg',
-        alt: 'Kids collection daily set',
-        caption: 'Daily sets',
-      },
-    ],
-    products: [],
-  },
   accessories: {
     eyebrow: 'Collection',
     title: 'Accessories',
@@ -322,14 +274,8 @@ export function buildCategoryShowcaseContent(
 ): CategoryShowcaseContent {
   const fallback = FALLBACK_CATEGORY_CONTENT[slug];
   const categoryName = category?.name?.trim() || fallback.title;
-  const productHighlights = products
-    .map((product) => product.name.trim())
-    .filter((productName) => !!productName)
-    .slice(0, 3);
   const productsWithImages = products.filter((product) => !!product.imageUrl).slice(0, 3);
-  const priceValues = products
-    .map((product) => product.price)
-    .filter((price): price is number => typeof price === 'number');
+  const priceValues = products.map((product) => product.price);
   const priceRange = buildPriceRange(priceValues);
 
   return {
@@ -371,10 +317,6 @@ function buildGallery(
 }
 
 function buildProductCaption(product: CatalogProduct): string {
-  if (typeof product.price !== 'number') {
-    return product.name;
-  }
-
   return `${product.name} - ${PRICE_FORMATTER.format(product.price)}`;
 }
 
@@ -403,8 +345,6 @@ function buildCategoryAccent(slug: CategorySlug): string {
       return 'Catalogo para ni\u00F1os';
     case 'girls':
       return 'Catalogo para ni\u00F1as';
-    case 'kids':
-      return 'Catalogo infantil';
     case 'accessories':
       return 'Catalogo para accesorios';
   }

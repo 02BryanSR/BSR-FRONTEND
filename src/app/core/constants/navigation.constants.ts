@@ -7,12 +7,12 @@ export interface NavigationLink {
 }
 
 export const PRIMARY_NAV_LINKS: readonly NavigationLink[] = [
-  { label: 'HOME', route: '/home', categorySlug: null },
-  { label: 'WOMEN', route: '/women', categorySlug: 'women' },
-  { label: 'MEN', route: '/men', categorySlug: 'men' },
-  { label: 'NI\u00D1OS', route: '/ninos', categorySlug: 'boys' },
-  { label: 'NI\u00D1AS', route: '/ninas', categorySlug: 'girls' },
-  { label: 'ACCESSORIES', route: '/accessories', categorySlug: 'accessories' },
+  { label: 'INICIO', route: '/home', categorySlug: null },
+  { label: 'MUJER', route: '/women', categorySlug: 'women' },
+  { label: 'HOMBRE', route: '/men', categorySlug: 'men' },
+  { label: 'NI\u00D1OS', route: '/boys', categorySlug: 'boys' },
+  { label: 'NI\u00D1AS', route: '/girls', categorySlug: 'girls' },
+  { label: 'ACCESORIOS', route: '/accessories', categorySlug: 'accessories' },
 ];
 
 export const HIDDEN_LAYOUT_ROUTES = [

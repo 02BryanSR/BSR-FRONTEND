@@ -13,9 +13,8 @@ const PRODUCT_SUBCATEGORY_STORAGE_KEY = 'bsr.admin.product-subcategories.v1';
 const CATEGORY_ALIASES: Record<CategorySlug, readonly string[]> = {
   women: ['women', 'woman', 'mujer', 'mujeres'],
   men: ['men', 'man', 'hombre', 'hombres'],
-  boys: ['boys', 'boy', 'nino', 'ninos', 'niños'],
-  girls: ['girls', 'girl', 'nina', 'ninas', 'niñas'],
-  kids: ['kids', 'kid', 'children', 'child', 'infantil'],
+  boys: ['boys', 'boy', 'niño', 'niños', 'niños'],
+  girls: ['girls', 'girl', 'niña', 'niñas', 'niñas'],
   accessories: ['accessories', 'accessory', 'accesorio', 'accesorios'],
 };
 

@@ -29,9 +29,9 @@
 
         <div class="xl:sticky xl:top-28 xl:h-fit">
           <app-surface-card tone="media" padding="lg">
-            <div class="space-y-6">
+            <div class="stack-6">
               <div class="space-y-3">
-                <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">
+                <p class="section-eyebrow">
                   NEW / EDITORIAL SELECTION
                 </p>
                 <h1
@@ -50,7 +50,7 @@
 
               @if (availableSizes().length) {
                 <div class="space-y-4 border-t border-black/10 pt-6">
-                  <div class="flex items-center justify-between gap-4">
+                  <div class="split-between">
                     <p class="text-[11px] uppercase tracking-[0.22em] text-neutral-800">
                       Selecciona tu talla
                     </p>
@@ -61,7 +61,7 @@
                     }
                   </div>
 
-                  <div class="flex flex-wrap gap-2">
+                  <div class="tags-wrap">
                     @for (size of availableSizes(); track size) {
                       <button
                         type="button"
@@ -87,7 +87,7 @@
                   Disponibilidad en tienda
                 </p>
 
-                <div class="flex flex-wrap gap-2">
+                <div class="tags-wrap">
                   <button
                     type="button"
                     disabled
@@ -118,7 +118,7 @@
                 </div>
               </div>
 
-              <div class="grid gap-3 sm:grid-cols-2">
+              <div class="form-grid-2-tight">
                 <button
                   type="button"
                   (click)="addToCart()"
@@ -146,7 +146,7 @@
                   {{ productNarrative() }}
                 </p>
                 @if (product.sku) {
-                  <p class="text-xs uppercase tracking-[0.22em] text-neutral-500">
+                  <p class="tiny-label">
                     SKU: {{ product.sku }}
                   </p>
                 }
@@ -161,15 +161,15 @@
         <section class="space-y-5">
           <div class="flex items-end justify-between gap-4">
             <div>
-              <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Complete tu look</p>
-              <h2 class="mt-3 text-2xl font-semibold uppercase tracking-[0.14em] text-neutral-950">
+              <p class="section-eyebrow">Complete tu look</p>
+              <h2 class="section-title">
                 Productos relacionados
               </h2>
             </div>
 
             <a
               routerLink="/cart"
-              class="inline-flex items-center justify-center border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+              class="plain-action-outline"
             >
               Ver carrito
             </a>
@@ -199,7 +199,7 @@
         <div class="mt-6">
           <a
             routerLink="/home"
-            class="inline-flex items-center justify-center border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+            class="plain-action-outline"
           >
             Volver a home
           </a>

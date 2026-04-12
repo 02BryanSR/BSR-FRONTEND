@@ -1,7 +1,7 @@
 <section class="mb-7.5 space-y-4" aria-label="Subcategorías">
-  <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">{{ label() }}</p>
+  <p class="section-eyebrow">{{ label() }}</p>
 
-  <div class="flex flex-wrap gap-2">
+  <div class="tags-wrap">
     @for (option of options(); track option.slug) {
       <a
         [routerLink]="route()"

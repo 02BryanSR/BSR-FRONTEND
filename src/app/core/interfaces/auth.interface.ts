@@ -28,11 +28,4 @@ export interface UserInfoResponse {
   avatarUrl?: string | null;
 }
 
-export interface JwtPayload {
-  sub?: string;
-  exp?: number;
-  iat?: number;
-  roles?: string[];
-}
-
-export type AuthSessionStatus = 'anonymous' | 'authenticated' | 'expired';
+export type AuthSessionStatus = 'anonymous' | 'authenticated';

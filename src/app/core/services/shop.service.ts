@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { computed, effect, Injectable, inject, signal, untracked } from '@angular/core';
 import { EMPTY, Observable, catchError, finalize, map, tap } from 'rxjs';
 import { API_ENDPOINTS } from '../constants/api.constants';
@@ -7,6 +7,7 @@ import {
   ConfirmPaymentInput,
   CreateOrderInput,
   CreatePaymentIntentInput,
+  OrderInvoiceFile,
   UserAddress,
   UserAddressInput,
   UserCart,
@@ -169,6 +170,23 @@ export class ShopService {
     );
   }
 
+  getMyOrderInvoice(id: number, download = false): Observable<OrderInvoiceFile> {
+    const params = new HttpParams().set('download', download);
+
+    return this.http
+      .get(API_ENDPOINTS.shop.orderInvoice(id), {
+        observe: 'response',
+        responseType: 'blob',
+        params,
+      })
+      .pipe(
+        map((response) => ({
+          blob: response.body ?? new Blob([], { type: 'application/pdf' }),
+          fileName: this.resolveInvoiceFilename(response, id),
+        })),
+      );
+  }
+
   createMyOrder(payload: CreateOrderInput): Observable<UserOrder> {
     return this.http.post<unknown>(API_ENDPOINTS.shop.orders, payload).pipe(
       map((response) => this.mapOrder(response)),
@@ -201,7 +219,7 @@ export class ShopService {
 
       untracked(() => {
         if (isAuthenticated) {
-          this.refreshCartFromServer('auth-restored');
+          this.refreshCartFromServer();
           return;
         }
 
@@ -221,7 +239,7 @@ export class ShopService {
 
     window.setInterval(() => {
       if (document.visibilityState === 'visible') {
-        this.refreshCartFromServer('poll');
+        this.refreshCartFromServer();
       }
     }, CART_SYNC_POLL_INTERVAL_MS);
 
@@ -237,7 +255,7 @@ export class ShopService {
   };
 
   private readonly handleWindowFocus = (): void => {
-    this.refreshCartFromServer('tab-focused');
+    this.refreshCartFromServer();
   };
 
   private readonly handleVisibilityChange = (): void => {
@@ -245,14 +263,14 @@ export class ShopService {
       return;
     }
 
-    this.refreshCartFromServer('tab-focused');
+    this.refreshCartFromServer();
   };
 
   private readonly handleCartSyncMessage = (event: MessageEvent<CartSyncPayload>): void => {
     this.handleExternalCartSync(event.data);
   };
 
-  private refreshCartFromServer(reason: CartSyncReason): void {
+  private refreshCartFromServer(): void {
     if (!this.authService.isAuthenticated() || this.cartRefreshInFlight) {
       return;
     }
@@ -279,18 +297,16 @@ export class ShopService {
     try {
       this.cartSyncChannel?.postMessage(payload);
     } catch {
-      // Ignore broadcast channel failures and keep storage-based sync as fallback.
+      
     }
 
     if (typeof localStorage === 'undefined') {
       return;
     }
 
-    try {
+
       localStorage.setItem(CART_SYNC_STORAGE_KEY, JSON.stringify(payload));
-    } catch {
-      // Ignore storage errors so cart mutations still complete.
-    }
+   
   }
 
   private buildCartSyncPayload(reason: CartSyncReason): CartSyncPayload | null {
@@ -316,7 +332,7 @@ export class ShopService {
       return;
     }
 
-    this.refreshCartFromServer('external-update');
+    this.refreshCartFromServer();
   }
 
   private parseCartSyncPayload(rawValue: string | null): CartSyncPayload | null {
@@ -533,5 +549,22 @@ export class ShopService {
     }
 
     return null;
+  }
+
+  private resolveInvoiceFilename(response: HttpResponse<Blob>, orderId: number): string {
+    const disposition = response.headers.get('content-disposition') ?? '';
+    const encodedMatch = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+
+    if (encodedMatch?.[1]) {
+      return decodeURIComponent(encodedMatch[1]);
+    }
+
+    const plainMatch = disposition.match(/filename="?([^";]+)"?/i);
+
+    if (plainMatch?.[1]) {
+      return plainMatch[1];
+    }
+
+    return `factura-bsr-${String(orderId).padStart(6, '0')}.pdf`;
   }
 }

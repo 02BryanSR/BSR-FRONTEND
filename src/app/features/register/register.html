@@ -1,4 +1,4 @@
-﻿<section class="min-h-screen bg-neutral-100 px-6 py-10 lg:px-10">
+<section class="auth-page">
   <article
     class="mx-auto flex min-h-[calc(100vh-5rem)] max-w-3xl flex-col justify-center rounded-2xl bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.08)] lg:p-12"
   >
@@ -8,35 +8,35 @@
     <form class="mt-8 space-y-5" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       <div class="grid gap-5 md:grid-cols-2">
         <label class="block">
-          <span class="mb-2 block text-sm font-medium text-neutral-600">Nombre</span>
+          <span class="form-helper-label">Nombre</span>
           <input
             type="text"
             formControlName="name"
-            class="w-full rounded-md border border-neutral-200 px-4 py-3 text-sm focus:border-surface-product focus:outline-none"
+            class="auth-input"
           />
         </label>
 
         <label class="block">
-          <span class="mb-2 block text-sm font-medium text-neutral-600">Apellidos</span>
+          <span class="form-helper-label">Apellidos</span>
           <input
             type="text"
             formControlName="lastName"
-            class="w-full rounded-md border border-neutral-200 px-4 py-3 text-sm focus:border-surface-product focus:outline-none"
+            class="auth-input"
           />
         </label>
       </div>
 
       <label class="block">
-        <span class="mb-2 block text-sm font-medium text-neutral-600">E-mail</span>
+        <span class="form-helper-label">E-mail</span>
         <input
           type="email"
           formControlName="email"
-          class="w-full rounded-md border border-neutral-200 px-4 py-3 text-sm focus:border-surface-product focus:outline-none"
+          class="auth-input"
         />
       </label>
 
       <label class="block">
-        <span class="mb-2 block text-sm font-medium text-neutral-600">Contraseña</span>
+        <span class="form-helper-label">Contraseña</span>
         <div
           class="flex items-center rounded-md border border-neutral-200 bg-white px-4 transition focus-within:border-surface-product"
         >
@@ -48,7 +48,7 @@
           <button
             type="button"
             (click)="togglePasswordVisibility()"
-            class="inline-flex h-9 w-9 items-center justify-center text-neutral-400 transition hover:text-neutral-700"
+            class="icon-button-muted"
             aria-label="Mostrar u ocultar contraseña"
           >
             <app-icon name="eye" class="h-4 w-4"></app-icon>
@@ -69,13 +69,13 @@
     <div class="mt-8 flex flex-wrap gap-3">
       <a
         routerLink="/login"
-        class="inline-flex items-center justify-center rounded-md border border-neutral-200 px-5 py-3 font-medium text-neutral-600 transition-colors hover:bg-neutral-100"
+        class="auth-link-secondary"
       >
         Volver a login
       </a>
       <a
         routerLink="/forgot-password"
-        class="inline-flex items-center justify-center rounded-md border border-neutral-200 px-5 py-3 font-medium text-neutral-600 transition-colors hover:bg-neutral-100"
+        class="auth-link-secondary"
       >
         Recuperar contraseña
       </a>

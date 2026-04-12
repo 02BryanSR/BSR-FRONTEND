@@ -5,7 +5,7 @@
         type="text"
         [value]="query()"
         [placeholder]="placeholder"
-        class="w-full rounded-[1.1rem] border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+        class="form-control form-control--white"
         autocomplete="off"
         (input)="onQueryInput($event)"
         (focus)="onInputFocus()"
@@ -17,7 +17,7 @@
           @if (showingNearbyOptions()) {
             <div class="border-b border-black/10 px-4 py-3">
               <p class="text-[11px] uppercase tracking-[0.22em] text-neutral-500">Ubicacion aproximada</p>
-              <p class="mt-2 text-sm text-neutral-600">
+              <p class="body-note">
                 Elige la direccion cercana que mejor coincide con tu posicion real.
               </p>
             </div>
@@ -52,7 +52,7 @@
 
     <button
       type="button"
-      class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+      class="pill-action pill-action--outline disabled:cursor-not-allowed disabled:opacity-50"
       [disabled]="locating()"
       (click)="useCurrentLocation()"
     >
@@ -61,12 +61,12 @@
   </div>
 
   @if (!lookupConfigured) {
-    <p class="text-sm text-neutral-500">
-      Anade tu API key de Geoapify en <code>public/app-config.js</code> para activar sugerencias y ubicacion automatica.
+    <p class="text-muted">
+      Anade tu API key de Geoapify en <code>src/environments/environment.ts</code> para activar sugerencias y ubicacion automatica.
     </p>
   } @else if (loading()) {
     <p class="text-xs uppercase tracking-[0.18em] text-neutral-500">Buscando direcciones...</p>
   } @else if (feedbackMessage()) {
-    <p class="text-sm text-neutral-500">{{ feedbackMessage() }}</p>
+    <p class="text-muted">{{ feedbackMessage() }}</p>
   }
 </div>

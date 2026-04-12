@@ -5,7 +5,6 @@ import { Observable, catchError, map, switchMap, tap, throwError } from 'rxjs';
 import {
   AuthResponse,
   AuthSessionStatus,
-  JwtPayload,
   LoginRequest,
   RegisterRequest,
   UserInfoResponse,
@@ -43,7 +42,7 @@ export class AuthService {
       return 'anonymous';
     }
 
-    return this.isTokenExpired(token) ? 'expired' : 'authenticated';
+    return 'authenticated';
   });
 
   constructor() {
@@ -116,7 +115,7 @@ export class AuthService {
     const token = this.authStorage.getToken();
     const user = this.authStorage.getUser<User>();
 
-    if (!token || this.isTokenExpired(token)) {
+    if (!token ) {
       this.authStorage.clear();
       this.tokenState.set(null);
       this.currentUserState.set(null);
@@ -162,33 +161,7 @@ export class AuthService {
     this.currentUserState.set(user);
   }
 
-  private isTokenExpired(token: string): boolean {
-    const payload = this.getTokenPayload(token);
-    const expirationTime = payload?.exp;
-
-    if (typeof expirationTime !== 'number') {
-      return false;
-    }
-
-    return expirationTime * 1000 <= Date.now();
-  }
-
-  private getTokenPayload(token: string): JwtPayload | null {
-    const [, payload] = token.split('.');
-
-    if (!payload) {
-      return null;
-    }
-
-    try {
-      const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
-      const decodedPayload = atob(normalizedPayload);
-
-      return JSON.parse(decodedPayload) as JwtPayload;
-    } catch {
-      return null;
-    }
-  }
+ 
 
   private authenticateWithToken(token: string): Observable<User> {
     this.authStorage.setToken(token);
@@ -213,7 +186,7 @@ export class AuthService {
     const token = this.authStorage.getToken();
     const user = this.authStorage.getUser<User>();
 
-    if (!token || this.isTokenExpired(token)) {
+    if (!token ) {
       this.tokenState.set(null);
       this.currentUserState.set(null);
       return;

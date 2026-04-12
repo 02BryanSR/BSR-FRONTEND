@@ -1,5 +1,5 @@
 import { ActivatedRoute } from '@angular/router';
-import { combineLatest, map, of, switchMap, type Observable } from 'rxjs';
+import { combineLatest, map, switchMap, type Observable } from 'rxjs';
 import {
   filterProductsBySubcategory,
   normalizeCategorySubcategory,
@@ -31,13 +31,6 @@ export function createCategoryShowcaseState(
   return combineLatest([catalogService.getCategoryBySlug(slug), route.queryParamMap]).pipe(
     switchMap(([category, queryParamMap]) => {
       const selectedSubcategory = normalizeCategorySubcategory(queryParamMap.get('subcategoria'));
-
-      if (!category) {
-        return of({
-          content: buildCategoryShowcaseContent(slug, null, []),
-          selectedSubcategory,
-        });
-      }
 
       return catalogService.getProductsByCategoryId(category.id).pipe(
         map((products) => ({

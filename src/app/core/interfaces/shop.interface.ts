@@ -93,3 +93,8 @@ export interface CheckoutPaymentIntent {
 export interface ConfirmPaymentInput {
   paymentIntentId: string;
 }
+
+export interface OrderInvoiceFile {
+  blob: Blob;
+  fileName: string;
+}

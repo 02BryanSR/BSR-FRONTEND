@@ -11,7 +11,6 @@ const SIZE_OPTIONS_BY_CATEGORY: Partial<Record<CategorySlug, readonly string[]>>
   men: ADULT_APPAREL_SIZES,
   boys: KIDS_APPAREL_SIZES,
   girls: KIDS_APPAREL_SIZES,
-  kids: KIDS_APPAREL_SIZES,
 };
 
 const SHOE_SIZE_OPTIONS_BY_CATEGORY: Partial<Record<CategorySlug, readonly string[]>> = {
@@ -19,7 +18,6 @@ const SHOE_SIZE_OPTIONS_BY_CATEGORY: Partial<Record<CategorySlug, readonly strin
   men: ADULT_SHOE_SIZES,
   boys: KIDS_SHOE_SIZES,
   girls: KIDS_SHOE_SIZES,
-  kids: KIDS_SHOE_SIZES,
 };
 
 export function resolveAvailableProductSizes(

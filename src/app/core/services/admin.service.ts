@@ -499,11 +499,11 @@ export class AdminService {
       return 'Accesorios';
     }
 
-    if (comparableValue === 'ninos') {
+    if (comparableValue === 'niños') {
       return 'Ni\u00F1os';
     }
 
-    if (comparableValue === 'ninas') {
+    if (comparableValue === 'niñas') {
       return 'Ni\u00F1as';
     }
 

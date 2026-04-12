@@ -1,9 +1,9 @@
-<section class="space-y-6">
+<section class="stack-6">
   <header
     class="flex flex-col gap-4 rounded-[2rem] bg-shell-925 px-6 py-7 text-white shadow-[0_24px_70px_rgba(0,0,0,0.2)] md:flex-row md:items-end md:justify-between"
   >
     <div>
-      <p class="text-[11px] uppercase tracking-[0.35em] text-white/55">
+      <p class="hero-eyebrow">
         <a routerLink="/admin/categories" class="transition hover:text-white">Categorías</a>
         /
         <span>Productos</span>
@@ -15,7 +15,7 @@
           Productos por subcategoría
         }
       </h1>
-      <p class="mt-3 max-w-2xl text-sm leading-7 text-white/70 md:text-base">
+      <p class="hero-body">
         @if (selectedCategory(); as category) {
           Gestiona aquí los productos de la subcategoría dentro de {{ category.name }}.
         } @else {
@@ -26,7 +26,7 @@
 
     <a
       routerLink="/admin/categories"
-      class="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-xs uppercase tracking-[0.22em] text-black transition hover:bg-neutral-200"
+      class="pill-action pill-action--white"
     >
       Volver a categorías
     </a>

@@ -34,11 +34,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/men/men').then((m) => m.Men),
   },
   {
-    path: 'ninos',
+    path: 'boys',
     loadComponent: () => import('./features/boys/boys').then((m) => m.Boys),
   },
   {
-    path: 'ninas',
+    path: 'girls',
     loadComponent: () => import('./features/girls/girls').then((m) => m.Girls),
   },
   {
@@ -122,12 +122,6 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: 'mujer', redirectTo: 'women', pathMatch: 'full' },
-  { path: 'hombre', redirectTo: 'men', pathMatch: 'full' },
-  { path: 'kids', redirectTo: 'ninos', pathMatch: 'full' },
-  { path: 'boys', redirectTo: 'ninos', pathMatch: 'full' },
-  { path: 'girls', redirectTo: 'ninas', pathMatch: 'full' },
-  { path: 'accesorios', redirectTo: 'accessories', pathMatch: 'full' },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },
 ];

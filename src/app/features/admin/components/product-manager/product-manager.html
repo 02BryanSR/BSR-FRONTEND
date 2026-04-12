@@ -1,4 +1,4 @@
-<section class="space-y-6">
+<section class="stack-6">
   @if (showHeader()) {
     <header
       class="flex flex-col gap-4 rounded-4xl bg-shell-925 px-6 py-7 text-white shadow-[0_24px_70px_rgba(0,0,0,0.2)] md:flex-row md:items-end md:justify-between"
@@ -7,16 +7,16 @@
         <h1 class="text-3xl font-semibold uppercase tracking-[0.14em] md:text-4xl">
           {{ headerTitle() }}
         </h1>
-        <p class="mt-3 max-w-2xl text-sm leading-7 text-white/70 md:text-base">
+        <p class="hero-body">
           {{ headerDescription() }}
         </p>
       </div>
 
-      <div class="flex flex-wrap gap-3">
+      <div class="actions-wrap">
         <button
           type="button"
           (click)="startCreate()"
-          class="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-xs uppercase tracking-[0.22em] text-black transition hover:bg-neutral-200"
+          class="pill-action pill-action--white"
         >
           Nuevo producto
         </button>
@@ -33,26 +33,26 @@
   }
 
   <section class="grid gap-6 lg:grid-cols-[minmax(0,1.18fr)_minmax(22rem,0.82fr)]">
-    <article class="rounded-4xl border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:p-6">
+    <article class="white-panel">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">
+          <p class="section-eyebrow">
             {{ showHeader() ? 'Listado' : 'Productos filtrados' }}
           </p>
-          <h2 class="mt-3 text-2xl font-semibold uppercase tracking-[0.14em] text-neutral-950">
+          <h2 class="section-title">
             {{ filteredProducts().length }} productos
           </h2>
 
           @if (currentCategory() || currentSubcategory()) {
             <div class="mt-3 flex flex-wrap gap-2">
               @if (currentCategory(); as category) {
-                <span class="rounded-full border border-black/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-600">
+                <span class="chip-outline">
                   {{ category.name }}
                 </span>
               }
 
               @if (currentSubcategory(); as subcategory) {
-                <span class="rounded-full border border-black/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-600">
+                <span class="chip-outline">
                   {{ subcategory.label }}
                 </span>
               }
@@ -60,16 +60,16 @@
           }
         </div>
 
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="actions-wrap actions-wrap--center">
           @if (loading()) {
-            <p class="text-sm text-neutral-500">Cargando...</p>
+            <p class="text-muted">Cargando...</p>
           }
 
           @if (!showHeader()) {
             <button
               type="button"
               (click)="startCreate()"
-              class="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800"
+              class="pill-action pill-action--primary"
             >
               Nuevo producto
             </button>
@@ -77,7 +77,7 @@
             <button
               type="button"
               (click)="loadData()"
-              class="inline-flex items-center justify-center rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+              class="pill-action pill-action--outline-wide"
             >
               Recargar
             </button>
@@ -117,12 +117,12 @@
                 <div class="flex flex-wrap items-start gap-2">
                   <h3 class="line-clamp-2 text-lg font-semibold text-neutral-950">{{ displayName(product) }}</h3>
                   @if (displayCategory(product)) {
-                    <span class="rounded-full border border-black/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-neutral-600">
+                    <span class="chip-outline">
                       {{ displayCategory(product) }}
                     </span>
                   }
                   @if (product.sku) {
-                    <span class="rounded-full bg-black px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white">
+                    <span class="chip-solid">
                       {{ product.sku }}
                     </span>
                   }
@@ -137,18 +137,18 @@
                 }
 
                 <div class="mt-4 grid gap-4 text-sm text-neutral-600 sm:grid-cols-3">
-                  <p class="min-w-0 rounded-2xl bg-white/70 px-3 py-3">
-                    <strong class="block text-[11px] uppercase tracking-[0.22em] text-neutral-500">Precio</strong>
-                    <span class="mt-2 block text-base font-semibold text-neutral-950">{{ displayPrice(product.price) }}</span>
+                  <p class="soft-chip-panel">
+                    <strong class="meta-label">Precio</strong>
+                    <span class="section-value">{{ displayPrice(product.price) }}</span>
                   </p>
 
-                  <p class="min-w-0 rounded-2xl bg-white/70 px-3 py-3">
-                    <strong class="block text-[11px] uppercase tracking-[0.22em] text-neutral-500">Stock</strong>
-                    <span class="mt-2 block text-base font-semibold text-neutral-950">{{ displayStock(product.stock) }}</span>
+                  <p class="soft-chip-panel">
+                    <strong class="meta-label">Stock</strong>
+                    <span class="section-value">{{ displayStock(product.stock) }}</span>
                   </p>
 
-                  <p class="min-w-0 rounded-2xl bg-white/70 px-3 py-3">
-                    <strong class="block text-[11px] uppercase tracking-[0.22em] text-neutral-500">Estado</strong>
+                  <p class="soft-chip-panel">
+                    <strong class="meta-label">Estado</strong>
                     <span class="mt-2 block text-sm font-medium text-neutral-700">
                       {{ displayImageStatus(product) }}
                     </span>
@@ -160,7 +160,7 @@
                 <button
                   type="button"
                   (click)="startEdit(product)"
-                  class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+                  class="pill-action pill-action--outline"
                 >
                   {{ selectedProductId() === product.id ? 'Editando' : 'Editar' }}
                 </button>
@@ -168,7 +168,7 @@
                 <button
                   type="button"
                   (click)="deleteProduct(product)"
-                  class="inline-flex items-center justify-center rounded-full border border-red-200 px-4 py-3 text-xs uppercase tracking-[0.22em] text-red-700 transition hover:bg-red-50"
+                  class="pill-action pill-action--danger"
                 >
                   Eliminar
                 </button>
@@ -181,7 +181,7 @@
           }
         </div>
       } @else {
-        <article class="mt-6 rounded-[1.6rem] border border-dashed border-black/15 bg-surface-panel px-5 py-8 text-sm leading-7 text-neutral-600">
+        <article class="mt-6 form-empty-state">
           @if (currentSubcategory()) {
             No hay productos cargados en esta subcategoría todavía. Usa el formulario lateral para crear el primero.
           } @else {
@@ -193,11 +193,11 @@
 
     <article
       #editorPanel
-      class="rounded-4xl border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:p-6 lg:sticky lg:top-4 lg:self-start lg:my-4 lg:h-[calc(100svh-2rem)] lg:overflow-y-auto"
+      class="white-panel white-panel--sticky"
     >
-      <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Formulario</p>
-      <div class="mt-3 flex items-center justify-between gap-4">
-        <h2 class="text-2xl font-semibold uppercase tracking-[0.14em] text-neutral-950">
+      <p class="section-eyebrow">Formulario</p>
+      <div class="section-header-row">
+        <h2 class="section-title-plain">
           {{ isEditing() ? 'Editar producto' : 'Nuevo producto' }}
         </h2>
 
@@ -205,7 +205,7 @@
           <button
             type="button"
             (click)="startCreate()"
-            class="text-xs uppercase tracking-[0.22em] text-neutral-500 transition hover:text-neutral-950"
+            class="muted-action"
           >
             Limpiar
           </button>
@@ -214,25 +214,25 @@
 
       @if (currentCategory()) {
         <article class="mt-6 rounded-[1.4rem] border border-black/10 bg-surface-panel px-4 py-4">
-          <p class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Contexto activo</p>
+          <p class="form-label">Contexto activo</p>
           <p class="mt-3 text-sm font-medium uppercase tracking-[0.14em] text-neutral-950">
             {{ currentCategory()!.name }}
           </p>
           @if (currentSubcategory()) {
-            <p class="mt-2 text-[11px] uppercase tracking-[0.22em] text-neutral-500">
+            <p class="meta-note">
               Subcategoría visible: {{ currentSubcategory()!.label }}
             </p>
           }
         </article>
       }
 
-      <form class="mt-6 space-y-5" [formGroup]="form" (ngSubmit)="submit()">
+      <form class="panel-form-stack" [formGroup]="form" (ngSubmit)="submit()">
         @if (showSubcategoryField) {
-          <label class="block space-y-2">
-            <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Subcategoria</span>
+          <label class="form-field">
+            <span class="form-label">Subcategoria</span>
             <select
               formControlName="subcategorySlug"
-              class="w-full rounded-[1.1rem] border border-black/10 bg-surface-panel px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+              class="form-control form-control--surface"
             >
               @for (subcategory of availableSubcategories; track subcategory.slug) {
                 <option [value]="subcategory.slug">{{ subcategory.label }}</option>
@@ -241,18 +241,18 @@
           </label>
         }
 
-        <label class="block space-y-2">
-          <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Nombre</span>
+        <label class="form-field">
+          <span class="form-label">Nombre</span>
           <input
             type="text"
             formControlName="name"
-            class="w-full rounded-[1.1rem] border border-black/10 bg-surface-panel px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+            class="form-control form-control--surface"
             placeholder="Vestido satinado"
           />
         </label>
 
-        <label class="block space-y-2">
-          <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">SKU</span>
+        <label class="form-field">
+          <span class="form-label">SKU</span>
           <input
             type="text"
             formControlName="sku"
@@ -262,25 +262,25 @@
           />
         </label>
 
-        <label class="block space-y-2">
-          <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Descripción</span>
+        <label class="form-field">
+          <span class="form-label">Descripción</span>
           <textarea
             rows="5"
             formControlName="description"
-            class="w-full rounded-[1.1rem] border border-black/10 bg-surface-panel px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+            class="form-control form-control--surface"
             placeholder="Ficha editorial corta y útil para la pantalla de detalle."
           ></textarea>
         </label>
 
-        <div class="grid gap-4 sm:grid-cols-2">
-          <label class="block space-y-2">
-            <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Precio</span>
+        <div class="form-grid-2">
+          <label class="form-field">
+            <span class="form-label">Precio</span>
             <input
               type="number"
               min="0.01"
               step="0.01"
               formControlName="price"
-              class="w-full rounded-[1.1rem] border border-black/10 bg-surface-panel px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+              class="form-control form-control--surface"
               placeholder="89.99"
             />
             @if (form.controls.price.touched && form.controls.price.invalid) {
@@ -290,24 +290,24 @@
             }
           </label>
 
-          <label class="block space-y-2">
-            <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Stock</span>
+          <label class="form-field">
+            <span class="form-label">Stock</span>
             <input
               type="number"
               min="0"
               step="1"
               formControlName="stock"
-              class="w-full rounded-[1.1rem] border border-black/10 bg-surface-panel px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+              class="form-control form-control--surface"
             />
           </label>
         </div>
 
         @if (showCategoryField()) {
-          <label class="block space-y-2">
-            <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Categoría</span>
+          <label class="form-field">
+            <span class="form-label">Categoría</span>
             <select
               formControlName="categoryId"
-              class="w-full rounded-[1.1rem] border border-black/10 bg-surface-panel px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+              class="form-control form-control--surface"
             >
               <option [ngValue]="null">Selecciona una categoría</option>
               @for (category of categories(); track category.id) {
@@ -317,29 +317,29 @@
           </label>
         }
 
-        <label class="block space-y-2">
-          <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">URL de imagen</span>
+        <label class="form-field">
+          <span class="form-label">URL de imagen</span>
           <input
             type="url"
             formControlName="imageUrl"
             (input)="onImageUrlInput()"
-            class="w-full rounded-[1.1rem] border border-black/10 bg-surface-panel px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+            class="form-control form-control--surface"
             placeholder="https://..."
           />
         </label>
 
-        <label class="block space-y-2">
-          <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Archivo de imagen</span>
+        <label class="form-field">
+          <span class="form-label">Archivo de imagen</span>
           <input
             type="file"
             accept="image/*"
             (change)="onImageFileChange($event)"
-            class="block w-full rounded-[1.1rem] border border-dashed border-black/15 bg-surface-panel px-4 py-4 text-sm text-neutral-600"
+            class="form-file-input"
           />
         </label>
 
         @if (imagePreview()) {
-          <article class="overflow-hidden rounded-3xl border border-black/10 bg-surface-panel">
+          <article class="image-preview-card">
             <img
               [src]="imagePreview()!"
               alt="Vista previa producto"
@@ -350,17 +350,17 @@
           <button
             type="button"
             (click)="clearImage()"
-            class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-700 transition hover:border-black hover:text-black"
+            class="pill-action pill-action--muted"
           >
             Quitar imagen
           </button>
         }
 
-        <div class="grid gap-3 pt-2 sm:grid-cols-2">
+        <div class="form-actions-grid">
           <button
             type="submit"
             [disabled]="saving()"
-            class="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+            class="pill-action pill-action--primary disabled:cursor-not-allowed disabled:opacity-60"
           >
             {{ saving() ? 'Guardando...' : isEditing() ? 'Actualizar producto' : 'Crear producto' }}
           </button>
@@ -368,7 +368,7 @@
           <button
             type="button"
             (click)="startCreate()"
-            class="inline-flex items-center justify-center rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+            class="pill-action pill-action--outline-wide"
           >
             Nuevo limpio
           </button>

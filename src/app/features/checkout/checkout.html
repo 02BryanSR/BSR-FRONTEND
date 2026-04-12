@@ -1,24 +1,24 @@
 <section class="w-full px-4 pb-12 pt-24 sm:px-6 md:px-8 lg:px-10 2xl:px-12">
   <div class="mx-auto max-w-400 space-y-6">
     <header class="rounded-4xl bg-shell-925 px-5 py-6 text-white shadow-[0_24px_70px_rgba(0,0,0,0.2)] sm:px-6 md:px-8 xl:px-10">
-      <p class="text-[11px] uppercase tracking-[0.35em] text-white/55">Compra final</p>
-      <div class="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <p class="hero-eyebrow">Compra final</p>
+      <div class="toolbar-actions">
         <div>
           <h1 class="text-3xl font-semibold uppercase tracking-[0.14em] md:text-4xl">Checkout</h1>
-          <p class="mt-3 max-w-2xl text-sm leading-7 text-white/70 md:text-base">
+          <p class="hero-body">
             Selecciona una direccion real, confirma el metodo de pago y convierte tu carrito en un pedido.
           </p>
         </div>
 
-        <div class="grid gap-3 sm:grid-cols-2">
-          <article class="rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4">
-            <p class="text-[11px] uppercase tracking-[0.26em] text-white/45">Productos</p>
-            <strong class="mt-3 block text-2xl font-semibold">{{ cart().totalProducts }}</strong>
+        <div class="form-grid-2-tight">
+          <article class="glass-panel">
+            <p class="hero-meta">Productos</p>
+            <strong class="section-title-block">{{ cart().totalProducts }}</strong>
           </article>
 
-          <article class="rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4">
-            <p class="text-[11px] uppercase tracking-[0.26em] text-white/45">Total</p>
-            <strong class="mt-3 block text-2xl font-semibold">{{
+          <article class="glass-panel">
+            <p class="hero-meta">Total</p>
+            <strong class="section-title-block">{{
               cart().total | currency: 'EUR' : 'symbol' : '1.0-2' : 'es'
             }}</strong>
           </article>
@@ -27,7 +27,7 @@
     </header>
 
     @if (loadingCart() || loadingAddresses()) {
-      <article class="rounded-[1.6rem] border border-black/10 bg-white px-5 py-8 text-sm text-neutral-600">
+      <article class="white-empty-panel">
         Preparando checkout...
       </article>
     } @else if (!hasItems()) {
@@ -36,13 +36,13 @@
         <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
           <a
             routerLink="/cart"
-            class="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800"
+            class="pill-action pill-action--primary"
           >
             Volver al carrito
           </a>
           <a
             routerLink="/women"
-            class="inline-flex items-center justify-center rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+            class="pill-action pill-action--outline-wide"
           >
             Seguir comprando
           </a>
@@ -53,27 +53,27 @@
         <article class="rounded-4xl border border-black/10 bg-white p-4 shadow-[0_20px_50px_rgba(15,23,42,0.06)] sm:p-5 md:p-6 xl:p-7">
           <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
-              <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Direccion de envio</p>
-              <h2 class="mt-3 text-2xl font-semibold uppercase tracking-[0.14em] text-neutral-950">
+              <p class="section-eyebrow">Direccion de envio</p>
+              <h2 class="section-title">
                 Selecciona una direccion
               </h2>
-              <p class="mt-3 text-sm leading-7 text-neutral-600">
+              <p class="body-flow">
                 Tus direcciones se cargan desde <code>/api/addresses/me</code> y se usan tal cual para crear el pedido.
               </p>
             </div>
 
-            <div class="flex flex-wrap gap-3">
+            <div class="actions-wrap">
               <button
                 type="button"
                 (click)="toggleQuickAddressForm()"
-                class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+                class="pill-action pill-action--outline"
               >
                 {{ showQuickAddressForm() ? 'Ocultar formulario' : 'Nueva direccion rapida' }}
               </button>
 
               <a
                 routerLink="/my-addresses"
-                class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+                class="pill-action pill-action--outline"
               >
                 Gestionar direcciones
               </a>
@@ -82,12 +82,12 @@
 
           @if (showQuickAddressForm()) {
             <form
-              class="mt-6 grid gap-4 rounded-[1.6rem] border border-black/10 bg-surface-panel p-5 sm:grid-cols-2"
+              class="mt-6 grid gap-4 form-panel sm:grid-cols-2"
               [formGroup]="quickAddressForm"
               (ngSubmit)="createQuickAddress()"
             >
-              <div class="block space-y-2 sm:col-span-2">
-                <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Direccion</span>
+              <div class="form-field sm:col-span-2">
+                <span class="form-label">Direccion</span>
                 <app-address-autocomplete
                   [value]="quickAddressForm.getRawValue().address || ''"
                   placeholder="Calle Gran Via 25"
@@ -96,42 +96,42 @@
                 ></app-address-autocomplete>
               </div>
 
-              <label class="block space-y-2">
-                <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Ciudad</span>
+              <label class="form-field">
+                <span class="form-label">Ciudad</span>
                 <input
                   type="text"
                   formControlName="city"
-                  class="w-full rounded-[1.1rem] border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+                  class="form-control form-control--white"
                   placeholder="Madrid"
                 />
               </label>
 
-              <label class="block space-y-2">
-                <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Provincia</span>
+              <label class="form-field">
+                <span class="form-label">Provincia</span>
                 <input
                   type="text"
                   formControlName="state"
-                  class="w-full rounded-[1.1rem] border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+                  class="form-control form-control--white"
                   placeholder="Madrid"
                 />
               </label>
 
-              <label class="block space-y-2">
-                <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Pais</span>
+              <label class="form-field">
+                <span class="form-label">Pais</span>
                 <input
                   type="text"
                   formControlName="country"
-                  class="w-full rounded-[1.1rem] border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+                  class="form-control form-control--white"
                   placeholder="Espana"
                 />
               </label>
 
-              <label class="block space-y-2">
-                <span class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Codigo postal</span>
+              <label class="form-field">
+                <span class="form-label">Codigo postal</span>
                 <input
                   type="text"
                   formControlName="cp"
-                  class="w-full rounded-[1.1rem] border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+                  class="form-control form-control--white"
                   placeholder="28013"
                 />
               </label>
@@ -140,7 +140,7 @@
                 <button
                   type="submit"
                   [disabled]="savingAddress()"
-                  class="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  class="pill-action pill-action--primary disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {{ savingAddress() ? 'Guardando...' : 'Guardar direccion' }}
                 </button>
@@ -167,27 +167,27 @@
                     />
                     <div>
                       <h3 class="text-lg font-semibold text-neutral-950">{{ address.address }}</h3>
-                      <p class="mt-2 text-sm text-neutral-600">
+                      <p class="body-note">
                         {{ address.cp }} - {{ address.city }} - {{ address.state }}
                       </p>
-                      <p class="mt-1 text-sm text-neutral-500">{{ address.country }}</p>
+                      <p class="caption-muted">{{ address.country }}</p>
                     </div>
                   </div>
                 </label>
               }
             } @else {
-              <article class="rounded-[1.6rem] border border-dashed border-black/15 bg-surface-panel px-5 py-8 text-sm leading-7 text-neutral-600">
+              <article class="form-empty-state">
                 No tienes direcciones guardadas todavia. Crea una desde este checkout o desde tu area de direcciones.
               </article>
             }
 
-            <div class="rounded-[1.6rem] border border-black/10 bg-surface-panel p-5">
-              <p class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Metodo de pago</p>
+            <div class="form-panel">
+              <p class="form-label">Metodo de pago</p>
               <label class="mt-4 block space-y-2">
-                <span class="text-sm text-neutral-600">Selecciona como quieres registrar el pedido</span>
+                <span class="text-body">Selecciona como quieres registrar el pedido</span>
                 <select
                   formControlName="payMethod"
-                  class="w-full rounded-[1.1rem] border border-black/10 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-black"
+                  class="form-control form-control--white"
                 >
                   <option value="CARD">CARD / STRIPE</option>
                   <option value="CASH">CASH</option>
@@ -199,11 +199,11 @@
               <div class="rounded-[1.6rem] border border-black/10 bg-surface-panel p-4 sm:p-5 md:p-6">
                 <div class="flex flex-col gap-3">
                   <div>
-                    <p class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Pago seguro</p>
+                    <p class="form-label">Pago seguro</p>
                     <h3 class="mt-3 text-xl font-semibold uppercase tracking-[0.12em] text-neutral-950">
                       {{ cardCheckoutMode === 'demo' ? 'Tarjeta de prueba' : 'Tarjeta con Stripe' }}
                     </h3>
-                    <p class="mt-3 text-sm leading-7 text-neutral-600">
+                    <p class="body-flow">
                       {{
                         cardCheckoutMode === 'demo'
                           ? 'Los datos empiezan precargados, pero puedes cambiarlos, borrarlos y forzar errores manualmente.'
@@ -220,8 +220,8 @@
                       (paymentStateChange)="onPaymentStateChange($event)"
                     ></app-stripe-payment-element>
 
-                    <div class="mt-5 rounded-[1.2rem] border border-black/10 bg-white px-4 py-4 text-sm text-neutral-600">
-                      <div class="flex items-center justify-between gap-4">
+                    <div class="info-box">
+                      <div class="split-between">
                         <span>Importe preparado</span>
                         <strong class="text-neutral-950">
                           {{ cart().total | currency: 'EUR' : 'symbol' : '1.2-2' : 'es' }}
@@ -232,7 +232,7 @@
                     @if (paymentElementError()) {
                       <p class="mt-4 text-sm text-red-600">{{ paymentElementError() }}</p>
                     } @else if (paymentElementReady() && !paymentElementComplete()) {
-                      <p class="mt-4 text-sm text-neutral-500">
+                      <p class="body-spaced-muted">
                         Completa primero los datos del metodo de pago para poder confirmar el pedido.
                       </p>
                     }
@@ -242,7 +242,7 @@
                     Falta configurar Stripe en el frontend.
                   </div>
                 } @else if (preparingPayment()) {
-                  <p class="mt-4 text-sm text-neutral-500">Preparando formulario de pago...</p>
+                  <p class="body-spaced-muted">Preparando formulario de pago...</p>
                 } @else if (paymentIntent(); as paymentIntent) {
                   <div class="mt-4">
                     <app-stripe-payment-element
@@ -251,8 +251,8 @@
                       (paymentStateChange)="onPaymentStateChange($event)"
                     ></app-stripe-payment-element>
 
-                    <div class="mt-5 rounded-[1.2rem] border border-black/10 bg-white px-4 py-4 text-sm text-neutral-600">
-                      <div class="flex items-center justify-between gap-4">
+                    <div class="info-box">
+                      <div class="split-between">
                         <span>Importe preparado</span>
                         <strong class="text-neutral-950">
                           {{
@@ -266,7 +266,7 @@
                     @if (paymentElementError()) {
                       <p class="mt-4 text-sm text-red-600">{{ paymentElementError() }}</p>
                     } @else if (paymentElementReady() && !paymentElementComplete()) {
-                      <p class="mt-4 text-sm text-neutral-500">
+                      <p class="body-spaced-muted">
                         Completa primero los datos del metodo de pago para poder confirmar el pedido.
                       </p>
                     }
@@ -283,7 +283,7 @@
               </div>
             } @else {
               <div class="rounded-[1.6rem] border border-black/10 bg-surface-panel p-4 sm:p-5 md:p-6">
-                <p class="text-[11px] uppercase tracking-[0.24em] text-neutral-500">Pago contra reembolso</p>
+                <p class="form-label">Pago contra reembolso</p>
                 <h3 class="mt-3 text-xl font-semibold uppercase tracking-[0.12em] text-neutral-950">
                   Cobro en la entrega
                 </h3>
@@ -291,7 +291,7 @@
                   El pedido se registra ahora y el pago se realiza cuando recibas la entrega.
                 </p>
 
-                <div class="mt-5 rounded-[1.2rem] border border-black/10 bg-white px-4 py-4 text-sm text-neutral-600">
+                <div class="info-box">
                   <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <span>Metodo seleccionado</span>
                     <strong class="text-neutral-950">CASH / CONTRA REEMBOLSO</strong>
@@ -310,23 +310,23 @@
         </article>
 
         <article class="h-fit rounded-4xl border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] sm:p-6 xl:sticky xl:top-28">
-          <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Resumen final</p>
-          <h2 class="mt-3 text-2xl font-semibold uppercase tracking-[0.14em] text-neutral-950">
+          <p class="section-eyebrow">Resumen final</p>
+          <h2 class="section-title">
             Confirmacion
           </h2>
 
-          <div class="mt-6 space-y-3">
+          <div class="list-stack-sm">
             @for (item of cart().items; track item.id) {
               <div class="grid gap-3 rounded-[1.3rem] border border-black/10 bg-surface-panel px-4 py-4 md:grid-cols-[1fr_auto_auto]">
                 <div>
-                  <p class="font-medium text-neutral-900">{{ item.productName }}</p>
+                  <p class="text-strong-neutral">{{ item.productName }}</p>
                   @if (item.size) {
                     <p class="mt-1 text-[11px] uppercase tracking-[0.22em] text-neutral-500">
                       Talla: {{ item.size }}
                     </p>
                   }
                 </div>
-                <p class="text-sm text-neutral-600">x{{ item.quantity }}</p>
+                <p class="text-body">x{{ item.quantity }}</p>
                 <p class="text-sm font-semibold text-neutral-900">
                   {{ item.subtotal | currency: 'EUR' : 'symbol' : '1.0-2' : 'es' }}
                 </p>
@@ -335,11 +335,11 @@
           </div>
 
           <div class="mt-6 space-y-4 rounded-[1.6rem] border border-black/10 bg-shell-925 p-5 text-white">
-            <div class="flex items-center justify-between text-sm text-white/70">
+            <div class="row-muted-dark">
               <span>Productos</span>
               <span>{{ cart().totalProducts }}</span>
             </div>
-            <div class="flex items-center justify-between text-sm text-white/70">
+            <div class="row-muted-dark">
               <span>Metodo de pago</span>
               <span>{{ checkoutForm.getRawValue().payMethod || 'CARD' }}</span>
             </div>
@@ -368,7 +368,7 @@
                 !hasAddresses() ||
                 (isCardPayment() && (!paymentElementComplete() || (cardCheckoutMode === 'stripe' && !paymentIntent())))
               "
-              class="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+              class="pill-action pill-action--primary disabled:cursor-not-allowed disabled:opacity-60"
             >
               {{
                 placingOrder()
@@ -381,7 +381,7 @@
 
             <a
               routerLink="/cart"
-              class="inline-flex items-center justify-center rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+              class="pill-action pill-action--outline-wide"
             >
               Volver al carrito
             </a>

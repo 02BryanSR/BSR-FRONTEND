@@ -1,21 +1,21 @@
-export type CategorySlug = 'women' | 'men' | 'boys' | 'girls' | 'kids' | 'accessories';
+export type CategorySlug = 'women' | 'men' | 'boys' | 'girls' | 'accessories';
 export type CatalogSubcategorySlug = 'all' | 'superiores' | 'inferiores' | 'conjuntos' | 'calzado';
 
 export interface CategoryApiResponse {
   id: number;
   name: string;
-  description: string | null;
+  description: string;
   imageUrl?: string | null;
-  productIds?: number[] | null;
+  productIds: number[];
 }
 
 export interface ProductApiResponse {
   id: number;
   name: string;
-  sku?: string | null;
-  description?: string | null;
-  price: number | null;
-  stock: number | null;
+  sku: string;
+  description: string;
+  price: number;
+  stock: number;
   categoryId: number;
   imageUrl?: string | null;
   image?: string | null;
@@ -29,17 +29,17 @@ export interface CatalogCategory {
   description: string;
   imageUrl: string | null;
   productIds: readonly number[];
-  slug: CategorySlug | null;
-  route: string | null;
+  slug: CategorySlug;
+  route: string;
 }
 
 export interface CatalogProduct {
   id: number;
   name: string;
-  sku: string | null;
+  sku: string;
   description: string;
-  price: number | null;
-  stock: number | null;
+  price: number;
+  stock: number;
   categoryId: number;
   imageUrl: string | null;
 }

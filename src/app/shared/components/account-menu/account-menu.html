@@ -23,7 +23,7 @@
       <article class="space-y-4 p-6">
         @if (authService.isAuthenticated()) {
           <header>
-            <p class="text-sm text-neutral-500">Sesión iniciada como</p>
+            <p class="text-muted">Sesión iniciada como</p>
             <strong class="mt-1 block break-all text-base font-semibold text-neutral-900">
               {{ authService.currentUser()?.email }}
             </strong>
@@ -36,7 +36,7 @@
             <a
               routerLink="/cart"
               (click)="navigateAndClose()"
-              class="flex items-center justify-center rounded-full border border-neutral-300 px-4 py-3 text-sm font-medium text-neutral-800 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
+              class="ghost-link-pill"
             >
               Mi carrito
             </a>
@@ -44,7 +44,7 @@
             <a
               routerLink="/favorites"
               (click)="navigateAndClose()"
-              class="flex items-center justify-center rounded-full border border-neutral-300 px-4 py-3 text-sm font-medium text-neutral-800 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
+              class="ghost-link-pill"
             >
               Mis favoritos
             </a>
@@ -52,7 +52,7 @@
             <a
               routerLink="/my-orders"
               (click)="navigateAndClose()"
-              class="flex items-center justify-center rounded-full border border-neutral-300 px-4 py-3 text-sm font-medium text-neutral-800 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
+              class="ghost-link-pill"
             >
               Mis pedidos
             </a>
@@ -60,7 +60,7 @@
             <a
               routerLink="/my-addresses"
               (click)="navigateAndClose()"
-              class="flex items-center justify-center rounded-full border border-neutral-300 px-4 py-3 text-sm font-medium text-neutral-800 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
+              class="ghost-link-pill"
             >
               Mis direcciones
             </a>
@@ -69,7 +69,7 @@
               <a
                 routerLink="/admin"
                 (click)="navigateAndClose()"
-                class="flex items-center justify-center rounded-full border border-neutral-300 px-4 py-3 text-sm font-medium text-neutral-800 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
+                class="ghost-link-pill"
               >
                 Panel admin
               </a>

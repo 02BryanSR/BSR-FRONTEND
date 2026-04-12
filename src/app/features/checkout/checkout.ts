@@ -242,7 +242,7 @@ export class Checkout {
       return;
     }
 
-    const paymentIntent = await this.ensurePaymentIntent(true);
+    const paymentIntent = await this.ensurePaymentIntent();
 
     if (!paymentIntent) {
       this.toastService.showError(
@@ -337,7 +337,7 @@ export class Checkout {
     await this.ensurePaymentIntent();
   }
 
-  private async ensurePaymentIntent(reuseExisting = false): Promise<CheckoutPaymentIntent | null> {
+  private async ensurePaymentIntent(): Promise<CheckoutPaymentIntent | null> {
     if (this.cardCheckoutMode === 'demo') {
       return null;
     }

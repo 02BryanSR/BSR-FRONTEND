@@ -1,40 +1,40 @@
 <section class="w-full px-6 pb-16 pt-28 md:px-10 lg:px-12.5">
-  <div class="mx-auto max-w-7xl space-y-6">
-    <header class="rounded-4xl bg-shell-925 px-6 py-7 text-white shadow-[0_24px_70px_rgba(0,0,0,0.2)] md:px-8">
-      <p class="text-[11px] uppercase tracking-[0.35em] text-white/55">Tu selección</p>
-      <div class="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+  <div class="page-shell">
+    <header class="dark-surface-card">
+      <p class="hero-eyebrow">Tu selección</p>
+      <div class="toolbar-actions">
         <div>
           <h1 class="text-3xl font-semibold uppercase tracking-[0.14em] md:text-4xl">Mis favoritos</h1>
-          <p class="mt-3 max-w-2xl text-sm leading-7 text-white/70 md:text-base">
+          <p class="hero-body">
             Guarda tus productos favoritos.
           </p>
         </div>
 
-        <div class="grid gap-3 sm:grid-cols-2">
-          <article class="rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4">
-            <p class="text-[11px] uppercase tracking-[0.26em] text-white/45">Favoritos</p>
-            <strong class="mt-3 block text-2xl font-semibold">{{ favorites().length }}</strong>
+        <div class="form-grid-2-tight">
+          <article class="glass-panel">
+            <p class="hero-meta">Favoritos</p>
+            <strong class="section-title-block">{{ favorites().length }}</strong>
           </article>
 
-          <article class="rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4">
-            <p class="text-[11px] uppercase tracking-[0.26em] text-white/45">Con precio</p>
-            <strong class="mt-3 block text-2xl font-semibold">{{ pricedCount() }}</strong>
+          <article class="glass-panel">
+            <p class="hero-meta">Con precio</p>
+            <strong class="section-title-block">{{ pricedCount() }}</strong>
           </article>
         </div>
       </div>
     </header>
 
-    <article class="rounded-4xl border border-black/10 bg-white p-5 shadow-[0_20px_50px_rgba(15,23,42,0.06)] md:p-6">
-      <div class="flex items-center justify-between gap-4">
+    <article class="white-panel">
+      <div class="split-between">
         <div>
-          <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Guardados</p>
-          <h2 class="mt-3 text-2xl font-semibold uppercase tracking-[0.14em] text-neutral-950">
+          <p class="section-eyebrow">Guardados</p>
+          <h2 class="section-title">
             Tu lista
           </h2>
         </div>
 
         @if (loading()) {
-          <p class="text-sm text-neutral-500">Cargando...</p>
+          <p class="text-muted">Cargando...</p>
         }
       </div>
 
@@ -45,7 +45,7 @@
       } @else if (hasItems()) {
         <div class="mt-6 space-y-4">
           @for (favorite of favorites(); track favorite.productId) {
-            <article class="rounded-[1.6rem] border border-black/10 bg-surface-panel p-5">
+            <article class="form-panel">
               <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div class="flex min-w-0 gap-4">
                   <figure class="w-24 shrink-0 overflow-hidden rounded-[1.2rem] bg-white">
@@ -67,7 +67,7 @@
                       <h3 class="text-lg font-semibold text-neutral-950">{{ favorite.productName }}</h3>
 
                       @if (favorite.productSku) {
-                        <span class="rounded-full bg-black px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white">
+                        <span class="chip-solid">
                           {{ favorite.productSku }}
                         </span>
                       }
@@ -75,8 +75,8 @@
 
                     <div class="mt-3 grid gap-3 text-sm text-neutral-600 sm:grid-cols-2">
                       <p>
-                        <strong class="block text-[11px] uppercase tracking-[0.22em] text-neutral-500">Precio</strong>
-                        <span class="mt-2 block text-base font-semibold text-neutral-950">
+                        <strong class="meta-label">Precio</strong>
+                        <span class="section-value">
                           {{
                             favorite.productPrice !== null
                               ? (favorite.productPrice | currency: 'EUR' : 'symbol' : '1.0-2' : 'es')
@@ -86,8 +86,8 @@
                       </p>
 
                       <p>
-                        <strong class="block text-[11px] uppercase tracking-[0.22em] text-neutral-500">Guardado</strong>
-                        <span class="mt-2 block text-base font-semibold text-neutral-950">
+                        <strong class="meta-label">Guardado</strong>
+                        <span class="section-value">
                           {{ favorite.createdAt | date: 'dd/MM/yyyy' : undefined : 'es' }}
                         </span>
                       </p>
@@ -98,7 +98,7 @@
                 <div class="flex w-full flex-col gap-3 md:w-56">
                   <a
                     [routerLink]="['/products', favorite.productId]"
-                    class="inline-flex items-center justify-center rounded-full border border-black/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+                    class="pill-action pill-action--outline"
                   >
                     Ver producto
                   </a>
@@ -107,7 +107,7 @@
                     type="button"
                     (click)="addToCart(favorite)"
                     [disabled]="addingProductId() === favorite.productId || sizeLoadingProductId() === favorite.productId"
-                    class="inline-flex items-center justify-center rounded-full bg-black px-4 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    class="pill-action pill-action--primary-compact disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {{
                       sizeLoadingProductId() === favorite.productId
@@ -122,7 +122,7 @@
                     type="button"
                     (click)="remove(favorite)"
                     [disabled]="removingProductId() === favorite.productId"
-                    class="inline-flex items-center justify-center rounded-full border border-red-200 px-4 py-3 text-xs uppercase tracking-[0.22em] text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    class="pill-action pill-action--danger disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {{ removingProductId() === favorite.productId ? 'Quitando...' : 'Quitar favorito' }}
                   </button>
@@ -132,19 +132,19 @@
           }
         </div>
       } @else {
-        <article class="mt-6 rounded-[1.6rem] border border-dashed border-black/15 bg-surface-panel px-5 py-8 text-sm leading-7 text-neutral-600">
+        <article class="mt-6 form-empty-state">
           Todavía no has guardado favoritos. Cuando pulses en guardar desde las cards o la ficha de producto aparecerán aquí.
           <div class="mt-6 flex flex-wrap gap-3">
             <a
               routerLink="/women"
-              class="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800"
+              class="pill-action pill-action--primary"
             >
               Ir a comprar
             </a>
 
             <a
               routerLink="/cart"
-              class="inline-flex items-center justify-center rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+              class="pill-action pill-action--outline-wide"
             >
               Ver carrito
             </a>
@@ -160,11 +160,11 @@
     <div class="w-full max-w-lg rounded-4xl border border-black/10 bg-white p-6 shadow-[0_24px_70px_rgba(0,0,0,0.2)]">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <p class="text-[11px] uppercase tracking-[0.28em] text-neutral-500">Selección de talla</p>
-          <h3 class="mt-3 text-2xl font-semibold uppercase tracking-[0.14em] text-neutral-950">
+          <p class="section-eyebrow">Selección de talla</p>
+          <h3 class="section-title">
             {{ favorite.productName }}
           </h3>
-          <p class="mt-3 text-sm leading-7 text-neutral-600">
+          <p class="body-flow">
             Elige una talla antes de añadir este producto al carrito.
           </p>
         </div>
@@ -202,7 +202,7 @@
           type="button"
           (click)="confirmPendingAddToCart()"
           [disabled]="addingProductId() === favorite.productId"
-          class="inline-flex items-center justify-center rounded-full bg-black px-5 py-3 text-xs uppercase tracking-[0.22em] text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+          class="pill-action pill-action--primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           {{ addingProductId() === favorite.productId ? 'Añadiendo...' : 'Confirmar talla' }}
         </button>
@@ -210,7 +210,7 @@
         <button
           type="button"
           (click)="closeSizePicker()"
-          class="inline-flex items-center justify-center rounded-full border border-black/10 px-5 py-3 text-xs uppercase tracking-[0.22em] text-neutral-900 transition hover:border-black hover:bg-black hover:text-white"
+          class="pill-action pill-action--outline-wide"
         >
           Cancelar
         </button>

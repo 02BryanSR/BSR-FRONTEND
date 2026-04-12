@@ -1,39 +1,19 @@
-﻿declare global {
-  interface Window {
-    __APP_CONFIG__?: {
-      apiBaseUrl?: string;
-      stripePublishableKey?: string;
-      cardCheckoutMode?: string;
-      geoapifyApiKey?: string;
-      geoapifyRegion?: string;
-      geoapifyLanguage?: string;
-    };
-  }
+import { environment } from '../../../environments/environment';
+
+function normalizeValue(value: string): string {
+  return value.trim();
 }
 
-const DEFAULT_API_BASE_URL = 'http://localhost:8080';
-
-function resolveApiBaseUrl(): string {
-  if (typeof window === 'undefined') {
-    return DEFAULT_API_BASE_URL;
-  }
-
-  const configuredBaseUrl = window.__APP_CONFIG__?.apiBaseUrl?.trim();
-
-  if (!configuredBaseUrl) {
-    return DEFAULT_API_BASE_URL;
-  }
-
-  return configuredBaseUrl.replace(/\/+$/, '');
+function normalizeBaseUrl(baseUrl: string): string {
+  return normalizeValue(baseUrl).replace(/\/+$/, '');
 }
 
-export const API_BASE_URL = resolveApiBaseUrl();
-export const STRIPE_PUBLISHABLE_KEY = window.__APP_CONFIG__?.stripePublishableKey?.trim() || '';
-const configuredCardCheckoutMode = window.__APP_CONFIG__?.cardCheckoutMode?.trim().toLowerCase();
-export const CARD_CHECKOUT_MODE = configuredCardCheckoutMode === 'stripe' ? 'stripe' : 'demo';
-export const ADDRESS_LOOKUP_API_KEY = window.__APP_CONFIG__?.geoapifyApiKey?.trim() || '';
-export const ADDRESS_LOOKUP_REGION = window.__APP_CONFIG__?.geoapifyRegion?.trim() || 'ES';
-export const ADDRESS_LOOKUP_LANGUAGE = window.__APP_CONFIG__?.geoapifyLanguage?.trim() || 'es';
+export const API_BASE_URL = normalizeBaseUrl(environment.apiBaseUrl);
+export const STRIPE_PUBLISHABLE_KEY = normalizeValue(environment.stripe.publishableKey);
+export const CARD_CHECKOUT_MODE = environment.stripe.checkoutMode;
+export const ADDRESS_LOOKUP_API_KEY = normalizeValue(environment.geoapify.apiKey);
+export const ADDRESS_LOOKUP_REGION = normalizeValue(environment.geoapify.region);
+export const ADDRESS_LOOKUP_LANGUAGE = normalizeValue(environment.geoapify.language);
 
 export const API_ENDPOINTS = {
   auth: {
@@ -61,6 +41,7 @@ export const API_ENDPOINTS = {
     address: (id: number | string) => `${API_BASE_URL}/api/addresses/me/${id}`,
     orders: `${API_BASE_URL}/api/orders/me`,
     order: (id: number | string) => `${API_BASE_URL}/api/orders/me/${id}`,
+    orderInvoice: (id: number | string) => `${API_BASE_URL}/api/orders/me/${id}/invoice`,
     orderDetails: (id: number | string) => `${API_BASE_URL}/api/orders/${id}/details`,
     paymentIntent: `${API_BASE_URL}/api/payments/intent`,
     confirmPayment: `${API_BASE_URL}/api/payments/confirm`,

@@ -1,4 +1,4 @@
-﻿<section
+<section
   class="relative grid min-h-screen grid-cols-1 items-center overflow-visible bg lg:h-screen lg:grid-cols-[1fr_1fr]"
 >
   <section class="relative z-10 hidden justify-center items-center lg:flex lg:min-h-0 lg:p-0">
@@ -22,7 +22,7 @@
         </p>
       </header>
 
-      <form class="space-y-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <form class="stack-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <section>
           <div class="mt-16 flex items-center justify-between lg:mt-8">
             <label
@@ -41,7 +41,7 @@
             @if (
               emailCtrl.touched && (emailCtrl.errors?.['required'] || emailCtrl.errors?.['email'])
             ) {
-              <span class="ml-3 whitespace-nowrap text-sm text-danger-600">
+              <span class="input-inline-error">
                 {{
                   emailCtrl.errors?.['required']
                     ? 'El email es obligatorio.'
@@ -54,7 +54,7 @@
           </div>
 
           <div
-            class="flex items-center border-b"
+            class="input-underline"
             [ngClass]="
               emailCtrl.touched && emailCtrl.invalid
                 ? 'border-danger-600'
@@ -67,7 +67,7 @@
               type="email"
               formControlName="email"
               placeholder="usuario@gmail.com"
-              class="w-full py-3 text-sm placeholder:text-neutral-300 focus:outline-none"
+              class="input-underline-field"
             />
 
             @if (emailValid) {
@@ -96,14 +96,14 @@
             </label>
 
             @if (passwordCtrl.touched && passwordCtrl.invalid) {
-              <span class="ml-3 whitespace-nowrap text-sm text-danger-600">
+              <span class="input-inline-error">
                 {{ passwordCtrl.errors?.['required'] ? 'La contraseña es obligatoria.' : '' }}
               </span>
             }
           </div>
 
           <div
-            class="flex items-center border-b"
+            class="input-underline"
             [ngClass]="
               passwordCtrl.touched && passwordCtrl.invalid
                 ? 'border-danger-600'
@@ -116,7 +116,7 @@
               [type]="showPassword() ? 'text' : 'password'"
               formControlName="password"
               placeholder="Introduce aquí tu contraseña"
-              class="w-full py-3 text-sm placeholder:text-neutral-300 focus:outline-none"
+              class="input-underline-field"
             />
             <button
               type="button"

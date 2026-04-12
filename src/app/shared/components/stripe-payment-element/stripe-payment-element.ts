@@ -106,7 +106,6 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
     expiry: { ...INITIAL_FIELD_STATE.expiry },
     cvc: { ...INITIAL_FIELD_STATE.cvc },
   };
-  private mounted = false;
   private viewReady = false;
 
   async ngAfterViewInit(): Promise<void> {
@@ -335,7 +334,6 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
       this.cardNumberElement.mount(numberHost);
       this.cardExpiryElement.mount(expiryHost);
       this.cardCvcElement.mount(cvcHost);
-      this.mounted = true;
     } catch (error) {
       const message = this.describeStripeError(
         error,
@@ -498,7 +496,6 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
     this.cardCvcElement = null;
     this.elements = null;
     this.stripe = null;
-    this.mounted = false;
     this.resetFieldState();
 
     if (this.mode === 'stripe') {
