@@ -56,7 +56,8 @@ export class ResetPassword {
       return;
     }
 
-    const token = this.route.snapshot.queryParamMap.get('token');
+    const token =
+      this.route.snapshot.queryParamMap.get('token') ?? this.route.snapshot.paramMap.get('token');
 
     if (!token) {
       this.toastService.show({

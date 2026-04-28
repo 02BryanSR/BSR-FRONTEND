@@ -19,12 +19,16 @@ export class App {
   readonly currentUrl = signal(this.router.url);
   readonly currentPath = computed(() => this.currentUrl().split(/[?#]/, 1)[0] || '/');
   readonly showHeader = computed(
-    () => !this.hiddenHeaderRoutes.has(this.currentPath()) && !this.currentPath().startsWith('/admin'),
+    () => !this.isHiddenLayoutRoute(this.currentPath()) && !this.currentPath().startsWith('/admin'),
   );
 
   constructor() {
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));
+  }
+
+  private isHiddenLayoutRoute(path: string): boolean {
+    return this.hiddenHeaderRoutes.has(path) || path.startsWith('/reset-password/');
   }
 }
