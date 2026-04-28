@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -136,10 +137,24 @@ export class MyAddresses {
             this.startCreate();
           }
         },
-        error: (error) => {
-          this.toastService.showError(error.error?.message ?? 'No se pudo eliminar la dirección.');
+        error: (error: HttpErrorResponse) => {
+          this.toastService.showError(this.getDeleteAddressErrorMessage(error), 7000);
         },
       });
+  }
+
+  private getDeleteAddressErrorMessage(error: HttpErrorResponse): string {
+    const message = typeof error.error?.message === 'string' ? error.error.message : '';
+
+    if (
+      message.toLowerCase().includes('foreign key') &&
+      message.includes('orders') &&
+      message.includes('address_id')
+    ) {
+      return 'No se puede eliminar esta dirección porque ya está vinculada a un pedido. Puedes editarla o crear otra para próximos pedidos.';
+    }
+
+    return message || 'No se pudo eliminar la dirección.';
   }
 
   onAddressInputChange(value: string): void {
