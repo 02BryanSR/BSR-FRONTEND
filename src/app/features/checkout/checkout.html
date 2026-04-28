@@ -57,9 +57,6 @@
               <h2 class="section-title">
                 Selecciona una direccion
               </h2>
-              <p class="body-flow">
-                Tus direcciones se cargan desde <code>/api/addresses/me</code> y se usan tal cual para crear el pedido.
-              </p>
             </div>
 
             <div class="actions-wrap">
@@ -203,13 +200,6 @@
                     <h3 class="mt-3 text-xl font-semibold uppercase tracking-[0.12em] text-neutral-950">
                       {{ cardCheckoutMode === 'demo' ? 'Tarjeta de prueba' : 'Tarjeta con Stripe' }}
                     </h3>
-                    <p class="body-flow">
-                      {{
-                        cardCheckoutMode === 'demo'
-                          ? 'Los datos empiezan precargados, pero puedes cambiarlos, borrarlos y forzar errores manualmente.'
-                          : 'Introduce los datos de la tarjeta para completar el pago.'
-                      }}
-                    </p>
                   </div>
                 </div>
 

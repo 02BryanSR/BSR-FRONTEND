@@ -139,8 +139,8 @@ export class AdminDashboard implements OnDestroy {
 
   readonly quickLinks = [
     {
-      title: 'Gestionar catalogo',
-      note: 'Categorias, subcategorias y productos conectados',
+      title: 'Gestionar cátalogo',
+      note: 'Categorías, subcategorias y productos conectados',
       route: '/admin/categories',
     },
     {
