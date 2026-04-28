@@ -10,8 +10,8 @@ export const PRIMARY_NAV_LINKS: readonly NavigationLink[] = [
   { label: 'INICIO', route: '/home', categorySlug: null },
   { label: 'MUJER', route: '/women', categorySlug: 'women' },
   { label: 'HOMBRE', route: '/men', categorySlug: 'men' },
-  { label: 'NI\u00D1OS', route: '/boys', categorySlug: 'boys' },
-  { label: 'NI\u00D1AS', route: '/girls', categorySlug: 'girls' },
+  { label: 'NIÑOS', route: '/boys', categorySlug: 'boys' },
+  { label: 'NIÑAS', route: '/girls', categorySlug: 'girls' },
   { label: 'ACCESORIOS', route: '/accessories', categorySlug: 'accessories' },
 ];
 
