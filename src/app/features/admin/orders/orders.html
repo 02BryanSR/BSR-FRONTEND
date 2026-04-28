@@ -95,8 +95,9 @@
                 <label class="form-field">
                   <span class="form-label">Cambiar estado</span>
                   <select
+                    #statusSelect
                     [value]="order.status"
-                    (change)="updateStatus(order, $any($event.target).value)"
+                    (change)="updateStatus(order, statusSelect.value)"
                     class="form-control form-control--white"
                   >
                     @for (status of orderStatuses; track status) {

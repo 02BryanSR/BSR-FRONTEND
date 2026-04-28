@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, signal } from '@angular/core';
 
 type FooterPanelId = 'contact' | 'about' | 'privacy' | 'terms' | 'cookies';
 
@@ -21,6 +21,9 @@ type FooterPanel = {
   templateUrl: './footer.html',
 })
 export class Footer {
+  @ViewChild('footerSection') private footerSection?: ElementRef<HTMLElement>;
+  @ViewChild('panelContent') private panelContent?: ElementRef<HTMLElement>;
+
   readonly activePanel = signal<FooterPanelId | null>(null);
 
   readonly links: readonly FooterLink[] = [
@@ -85,26 +88,26 @@ export class Footer {
       ],
     },
     {
-  id: 'terms',
-  kicker: 'Políticas',
-  title: 'Términos y condiciones',
-  paragraphs: [
-    'El uso de esta plataforma implica la aceptación de los presentes términos y condiciones.',
-    'BSR ofrece productos sujetos a disponibilidad y se reserva el derecho de modificar precios, contenidos o servicios en cualquier momento.',
-    'El usuario se compromete a proporcionar información veraz y a hacer un uso adecuado de la plataforma.',
-    'BSR no se responsabiliza de un uso indebido del servicio ni de interrupciones ajenas a su control.',
-  ],
-},
-   {
-  id: 'cookies',
-  kicker: 'Políticas',
-  title: 'Política de cookies',
-  paragraphs: [
-    'Este sitio utiliza cookies para mejorar la experiencia de navegación y el funcionamiento de la plataforma.',
-    'Las cookies permiten recordar preferencias, gestionar sesiones y analizar el uso del sitio.',
-    'Puedes configurar o desactivar las cookies desde tu navegador en cualquier momento.',
-  ],
-},
+      id: 'terms',
+      kicker: 'Politicas',
+      title: 'Terminos y condiciones',
+      paragraphs: [
+        'El uso de esta plataforma implica la aceptacion de los presentes terminos y condiciones.',
+        'BSR ofrece productos sujetos a disponibilidad y se reserva el derecho de modificar precios, contenidos o servicios en cualquier momento.',
+        'El usuario se compromete a proporcionar informacion veraz y a hacer un uso adecuado de la plataforma.',
+        'BSR no se responsabiliza de un uso indebido del servicio ni de interrupciones ajenas a su control.',
+      ],
+    },
+    {
+      id: 'cookies',
+      kicker: 'Politicas',
+      title: 'Politica de cookies',
+      paragraphs: [
+        'Este sitio utiliza cookies para mejorar la experiencia de navegacion y el funcionamiento de la plataforma.',
+        'Las cookies permiten recordar preferencias, gestionar sesiones y analizar el uso del sitio.',
+        'Puedes configurar o desactivar las cookies desde tu navegador en cualquier momento.',
+      ],
+    },
   ];
 
   readonly activePanelContent = computed(
@@ -112,6 +115,35 @@ export class Footer {
   );
 
   togglePanel(panelId: FooterPanelId): void {
-    this.activePanel.update((currentPanel) => (currentPanel === panelId ? null : panelId));
+    const nextPanelId = this.activePanel() === panelId ? null : panelId;
+    this.activePanel.set(nextPanelId);
+
+    if (!nextPanelId) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        const footerElement = this.footerSection?.nativeElement;
+        const panelElement = this.panelContent?.nativeElement;
+
+        if (!footerElement || !panelElement) {
+          return;
+        }
+
+        const footerTop = footerElement.getBoundingClientRect().top + window.scrollY;
+        const panelHeight = panelElement.getBoundingClientRect().height;
+        const viewportHeight = window.innerHeight;
+        const topSpacing = 24;
+        const visibleRoomBelowHeader = viewportHeight - topSpacing;
+        const panelNeedsExtraOffset = panelHeight > visibleRoomBelowHeader * 0.55 ? 0 : 36;
+        const targetTop = Math.max(footerTop - topSpacing - panelNeedsExtraOffset, 0);
+
+        window.scrollTo({
+          top: targetTop,
+          behavior: 'smooth',
+        });
+      });
+    });
   }
 }

@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { Observable, catchError, map, switchMap, tap, throwError } from 'rxjs';
 import {
   AuthResponse,
-  AuthSessionStatus,
   LoginRequest,
   RegisterRequest,
   UserInfoResponse,
@@ -32,18 +31,6 @@ export class AuthService {
   readonly token = this.tokenState.asReadonly();
   readonly isAuthenticated = computed(() => !!this.tokenState() && !!this.currentUserState());
   readonly isAdmin = computed(() => this.currentUserState()?.rol === 'admin');
-  readonly isUser = computed(() => this.currentUserState()?.rol === 'user');
-
-  readonly sessionStatus = computed<AuthSessionStatus>(() => {
-    const token = this.tokenState();
-    const user = this.currentUserState();
-
-    if (!token || !user) {
-      return 'anonymous';
-    }
-
-    return 'authenticated';
-  });
 
   constructor() {
     this.restoreSession();
@@ -83,24 +70,6 @@ export class AuthService {
     return this.tokenState();
   }
 
-  getCurrentRole(): UserRole | null {
-    return this.currentUserState()?.rol ?? null;
-  }
-
-  hasRole(role: UserRole): boolean {
-    return this.currentUserState()?.rol === role;
-  }
-
-  hasAnyRole(roles: readonly UserRole[]): boolean {
-    const role = this.currentUserState()?.rol;
-
-    if (!role) {
-      return false;
-    }
-
-    return roles.includes(role);
-  }
-
   getHomeRoute(): string {
     const role = this.currentUserState()?.rol;
 
@@ -115,7 +84,7 @@ export class AuthService {
     const token = this.authStorage.getToken();
     const user = this.authStorage.getUser<User>();
 
-    if (!token ) {
+    if (!token) {
       this.authStorage.clear();
       this.tokenState.set(null);
       this.currentUserState.set(null);
@@ -161,8 +130,6 @@ export class AuthService {
     this.currentUserState.set(user);
   }
 
- 
-
   private authenticateWithToken(token: string): Observable<User> {
     this.authStorage.setToken(token);
     this.tokenState.set(token);
@@ -186,7 +153,7 @@ export class AuthService {
     const token = this.authStorage.getToken();
     const user = this.authStorage.getUser<User>();
 
-    if (!token ) {
+    if (!token) {
       this.tokenState.set(null);
       this.currentUserState.set(null);
       return;

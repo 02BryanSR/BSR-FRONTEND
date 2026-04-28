@@ -123,7 +123,7 @@ export class StripePaymentElementComponent implements AfterViewInit, OnChanges, 
     this.destroyCardElements();
   }
 
-  async confirmPayment(_returnUrl?: string): Promise<{ success: boolean; errorMessage?: string }> {
+  async confirmPayment(): Promise<{ success: boolean; errorMessage?: string }> {
     if (this.mode === 'demo') {
       const errorMessage = this.validateDemoFields();
 

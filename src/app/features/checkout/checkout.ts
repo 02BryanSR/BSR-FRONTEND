@@ -251,9 +251,7 @@ export class Checkout {
       return;
     }
 
-    const paymentResult = await this.stripePaymentElement.confirmPayment(
-      `${window.location.origin}/my-orders`,
-    );
+    const paymentResult = await this.stripePaymentElement.confirmPayment();
 
     if (!paymentResult?.success) {
       this.toastService.showError(

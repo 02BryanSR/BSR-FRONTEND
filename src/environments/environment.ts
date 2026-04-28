@@ -1,7 +1,6 @@
 import type { AppEnvironment } from './environment.model';
 
 export const environment: AppEnvironment = {
-  production: false,
   apiBaseUrl: 'http://localhost:8080',
   stripe: {
     publishableKey:
@@ -12,9 +11,5 @@ export const environment: AppEnvironment = {
     apiKey: 'e7b1688accf34937a2e7deb37dd8a434',
     region: 'ES',
     language: 'es',
-  },
-  resend: {
-    enabled: false,
-    senderEmail: '',
   },
 };

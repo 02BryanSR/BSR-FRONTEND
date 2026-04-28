@@ -65,8 +65,6 @@ export class ShopService {
     this.registerBrowserSync();
   }
 
-  ensureInitialized(): void {}
-
   loadMyCart(): Observable<UserCart> {
     return this.http.get<unknown>(API_ENDPOINTS.shop.cart).pipe(
       map((response) => this.mapCart(response)),
@@ -155,12 +153,6 @@ export class ShopService {
   getMyOrders(): Observable<readonly UserOrder[]> {
     return this.http.get<unknown>(API_ENDPOINTS.shop.orders).pipe(
       map((response) => this.asArray(response).map((item) => this.mapOrder(item))),
-    );
-  }
-
-  getMyOrder(id: number): Observable<UserOrder> {
-    return this.http.get<unknown>(API_ENDPOINTS.shop.order(id)).pipe(
-      map((response) => this.mapOrder(response)),
     );
   }
 
@@ -297,16 +289,13 @@ export class ShopService {
     try {
       this.cartSyncChannel?.postMessage(payload);
     } catch {
-      
     }
 
     if (typeof localStorage === 'undefined') {
       return;
     }
 
-
-      localStorage.setItem(CART_SYNC_STORAGE_KEY, JSON.stringify(payload));
-   
+    localStorage.setItem(CART_SYNC_STORAGE_KEY, JSON.stringify(payload));
   }
 
   private buildCartSyncPayload(reason: CartSyncReason): CartSyncPayload | null {

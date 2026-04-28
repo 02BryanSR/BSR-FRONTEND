@@ -27,5 +27,3 @@ export interface UserInfoResponse {
   phone?: string | null;
   avatarUrl?: string | null;
 }
-
-export type AuthSessionStatus = 'anonymous' | 'authenticated';
