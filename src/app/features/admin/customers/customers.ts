@@ -64,7 +64,7 @@ export class AdminCustomers {
         error: () => {
           this.customers.set([]);
           this.toastService.showError(
-            'No se pudieron cargar los clientes. Revisa que el backend admin exponga /api/customers.',
+            'No se pudieron cargar los clientes.',
           );
         },
       });
