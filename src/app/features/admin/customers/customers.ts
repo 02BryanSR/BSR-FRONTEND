@@ -144,7 +144,7 @@ export class AdminCustomers {
     const isSelf = this.currentUser()?.email === customer.email;
 
     if (isSelf && customer.enabled) {
-      this.toastService.showError('No puedes desactivar la cuenta con la que has iniciado sesion.');
+      this.toastService.showError('No puedes desactivar la cuenta con la que has iniciado sesión.');
       return;
     }
 

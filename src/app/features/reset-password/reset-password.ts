@@ -103,7 +103,7 @@ export class ResetPassword {
         error: (error: HttpErrorResponse) => {
           this.toastService.show({
             type: 'error',
-            title: 'No se pudo restablecer la contrasena',
+            title: 'No se pudo restablecer la contraseña',
             message: error.error?.message || 'El enlace puede haber expirado o ser invalido.',
           });
         },

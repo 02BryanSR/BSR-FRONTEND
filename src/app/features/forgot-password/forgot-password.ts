@@ -62,7 +62,7 @@ export class ForgotPassword {
           this.toastService.show({
             type: 'error',
             title: 'No se pudo enviar el correo',
-            message: error.error?.message || 'No se pudo procesar la solicitud de recuperacion.',
+            message: error.error?.message || 'No se pudo procesar la solicitud de recuperación.',
           });
         },
       });
